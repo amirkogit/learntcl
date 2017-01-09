@@ -29,3 +29,9 @@ set a(2) 7
 set a(3) 17
 set b    2
 puts "Sum: [expr {$a(1)+$a($b)}]"
+
+# x ? y:Z
+set x 1
+set result_label "Result of x ? y : z is "
+set result [expr { $x > 0 ? ($x + 1) : ($x -1)}]
+puts "$result_label $result"
