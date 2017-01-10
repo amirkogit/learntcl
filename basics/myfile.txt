@@ -1,0 +1,10 @@
+This a test file for testing tcl file access.
+fileAccess101.tcl uses this file.
+Multiline file:
+Copied above text
+This a test file for testing tcl file access.
+fileAccess101.tcl uses this file.
+This a test file for testing tcl file access.
+fileAccess101.tcl uses this file.
+This a test file for testing tcl file access.
+fileAccess101.tcl uses this file.
