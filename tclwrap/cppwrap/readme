@@ -1,0 +1,32 @@
+Creating tcl wrapper for .cpp files
+
+- The folder contains following files
+example.cpp - main cpp file containing functions to wrapper
+example.i - interface wrapper
+
+- use following commands
+$ swig -c++ -tcl example.i
+This will create example_wrap.cxx
+
+- to run the program
+$ ./a.out
+
+- to view the content of example_wrap.cxx
+$ cat example_wrap.cxx
+
+- creating .o files
+$ c++ -fpic -c example.cpp example_wrap.cxx -I/dirctory where tcltk is installed/include -shared
+This will create example.o and example_wrap.o files
+
+- to create .so library file
+$ g++ -shared example.o example_wrap.o -o example.so
+This will create example.so file
+
+- to test, invoke tclsh interpreter
+$ tclsh
+% load ./example.so example
+% fact 5
+120
+% get_time
+invalid command name "get_time"
+%
