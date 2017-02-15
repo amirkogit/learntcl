@@ -1,0 +1,33 @@
+#
+# Example 3-8
+# The newguest.html form.
+#
+
+<HTML>
+<HEAD>
+<TITLE>Register in my Guestbook</TITLE>
+</HEAD>
+<BODY BGCOLOR=white TEXT=black>
+
+<FORM ACTION="newguest.cgi" METHOD="POST">
+
+<H1>Register in my Guestbook</H1>
+<UL>
+<LI>Name <INPUT TYPE="text" NAME="name" SIZE="40">
+<LI>URL  <INPUT TYPE="text" NAME="url" SIZE="40">
+<P>
+If you don't have a home page, you can use an email URL like "mailto:welch@acm.org"
+<LI>Additional HTML to include after your link:
+<BR>
+
+<TEXTAREA NAME="html" COLS="60" ROWS="15">
+</TEXTAREA>
+<LI><INPUT TYPE="submit" NAME="new" VALUE="Add me to your guestbook">
+<LI><INPUT TYPE="submit" NAME="update" VALUE="Update my guestbook entry">
+</UL>
+</FORM>
+
+</BODY>
+</HTML>
+
+

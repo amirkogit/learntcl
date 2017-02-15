@@ -1,0 +1,23 @@
+#
+# Example 18-17
+# A page with a self-checking form.
+#
+
+<html><head>
+	<title>Name and Address Form</title>
+</head>
+<body bgcolor=white text=black>
+	<h1>Name and Address</h1>
+	Please enter your name and address.
+	[Form_Simple nameaddr {
+		1 name			"Name"
+		1 addr1			"Address"
+		0 addr2		"	"Address"
+		1 city			"City"
+		0 state			"State"
+		1 zip			"Zip Code"
+		0 country			"Country"
+	} nameok.html]
+</body></html>
+
+

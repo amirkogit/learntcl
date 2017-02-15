@@ -1,0 +1,14 @@
+#
+# Example 22-7
+# The contents of the tclhttpd.vfs directory, version 1.
+#
+
+main.tcl
+tclhttpd3.4.2/bin/httpd.tcl
+tclhttpd3.4.2/bin/httpdthread.tcl
+tclhttpd3.4.2/bin/tclhttpd.rc
+tclhttpd3.4.2/lib/ (lots of files)
+tclhttpd3.4.2/htdocs/ (lots of files)
+tcllib1.3 (copy of /usr/local/lib/tclib1.3)
+
+

@@ -1,0 +1,17 @@
+#
+# Example 29-2
+# Output from the UNIX xmodmap program. 
+#
+
+xmodmap: up to 3 keys per modifier, 
+		(keycodes in parentheses):
+shift Shift_L (0x6a), Shift_R (0x75)
+lock Caps_Lock (0x7e)
+control Control_L (0x53)
+mod1 Meta_L (0x7f), Meta_R (0x81)
+mod2 Mode_switch (0x14)
+mod3 Num_Lock (0x69)
+mod4 Alt_L (0x1a)
+mod5 F13 (0x20), F18 (0x50), F20 (0x68)
+
+

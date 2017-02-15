@@ -1,0 +1,19 @@
+#
+# Example 18-13
+# Mail message sent by /mail/forminfo.
+#
+
+To: mailreader@my.com
+Subject: Name and Address
+
+data {
+	name		{Joe Visitor}
+	addr1		{Acme Company}
+	addr2		{100 Main Street}
+	city		{Mountain View}
+	state		California
+	zip		12345
+	country			USA
+}
+
+

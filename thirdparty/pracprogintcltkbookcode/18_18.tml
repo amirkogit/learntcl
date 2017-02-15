@@ -1,0 +1,19 @@
+#
+# Example 18-18
+# Generating a table with html::foreach.
+#
+
+<TABLE BORDER=1>
+[html::foreach {product price} {
+	T-Shirt			$10.00
+	YoYo			$7.50
+	Footbag			$15.00
+} {
+	<TR>
+		<TD>$product</TD>
+		<TD ALIGN=RIGHT><FONT FACE=courier>$price</FONT></TD>
+	</TR>
+}
+</TABLE>
+
+

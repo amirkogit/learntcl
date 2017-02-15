@@ -1,0 +1,10 @@
+#
+# Example 22-2
+# The files in a simple Starkit.
+#
+
+main.tcl
+lib/app-hello/pkgIndex.tcl
+lib/app-hello/hello.tcl
+
+

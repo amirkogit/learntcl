@@ -1,0 +1,20 @@
+#
+# Example 18-12
+# Mail form results with /mail/forminfo.
+#
+
+<form action=/mail/forminfo method=post>
+	<input type=hidden name=sendto value=mailreader@my.com>
+	<input type=hidden name=subject value="Name and Address">
+	<table>
+		<tr><td>Name</td><td><input name=name></td></tr>
+		<tr><td>Address</td><td><input name=addr1></td></tr>
+		<tr><td> </td><td><input name=addr2></td></tr>
+		<tr><td>City</td><td><input name=city></td></tr>
+		<tr><td>State</td><td><input name=state></td></tr>
+		<tr><td>Zip/Postal</td><td><input name=zip></td></tr>
+		<tr><td>Country</td><td><input name=country></td></tr>
+	</table>
+</form>
+
+

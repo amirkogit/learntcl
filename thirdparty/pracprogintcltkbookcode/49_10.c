@@ -1,0 +1,55 @@
+/*
+ * Example 49-10
+ * Configuration specs for the clock widget.
+ */
+
+static Tk_ConfigSpec configSpecs[] = {
+	{TK_CONFIG_BORDER, "-background", "background",
+		"Background", "light blue",
+		Tk_Offset(Clock, background), TK_CONFIG_COLOR_ONLY},
+	{TK_CONFIG_BORDER, "-background", "background",
+		"Background", "white", Tk_Offset(Clock, background),
+		TK_CONFIG_MONO_ONLY},
+	{TK_CONFIG_SYNONYM, "-bg", "background", (char *) NULL,
+		(char *) NULL, 0, 0},
+	{TK_CONFIG_SYNONYM, "-bd", "borderWidth", (char *) NULL,
+		(char *) NULL, 0, 0},
+	{TK_CONFIG_PIXELS, "-borderwidth", "borderWidth",
+		"BorderWidth","2", Tk_Offset(Clock, borderWidth), 0},
+	{TK_CONFIG_RELIEF, "-relief", "relief", "Relief",
+		"ridge", Tk_Offset(Clock, relief), 0},
+	{TK_CONFIG_COLOR, "-foreground", "foreground",
+		"Foreground", "black", Tk_Offset(Clock, foreground),0},
+	{TK_CONFIG_SYNONYM, "-fg", "foreground", (char *) NULL,
+		(char *) NULL, 0, 0},
+	{TK_CONFIG_COLOR, "-highlightcolor", "highlightColor",
+		"HighlightColor", "red", Tk_Offset(Clock, highlight),
+		TK_CONFIG_COLOR_ONLY},
+	{TK_CONFIG_COLOR, "-highlightcolor", "highlightColor",
+		 "HighlightColor", "black", 
+		Tk_Offset(Clock, highlight),TK_CONFIG_MONO_ONLY},
+	{TK_CONFIG_COLOR, "-highlightbackground", 
+		"highlightBackground", "HighlightBackground",
+		"light blue", Tk_Offset(Clock, highlightBg),
+		TK_CONFIG_COLOR_ONLY},
+	{TK_CONFIG_COLOR, "-highlightbackground", 
+		"highlightBackground", "HighlightBackground",
+		"black", Tk_Offset(Clock, highlightBg),
+		TK_CONFIG_MONO_ONLY},
+	{TK_CONFIG_PIXELS, "-highlightthickness",
+		"highlightThickness","HighlightThickness",
+		"2", Tk_Offset(Clock, highlightWidth), 0},
+	{TK_CONFIG_PIXELS, "-padx", "padX", "Pad",
+		"2", Tk_Offset(Clock, padX), 0},
+	{TK_CONFIG_PIXELS, "-pady", "padY", "Pad",
+		"2", Tk_Offset(Clock, padY), 0},
+	{TK_CONFIG_STRING, "-format", "format", "Format",
+		"%H:%M:%S", Tk_Offset(Clock, format), 0},
+	{TK_CONFIG_FONT, "-font", "font", "Font",
+		"Courier 18",
+		 Tk_Offset(Clock, tkfont), 0},
+	{TK_CONFIG_END, (char *) NULL, (char *) NULL,
+		 (char *) NULL, (char *) NULL, 0, 0}
+};
+
+

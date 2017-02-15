@@ -1,0 +1,15 @@
+#
+# Example 22-9
+# Contents of the tclhttpd.vfs directory, version 2.
+#
+
+main.tcl
+bin/httpd.tcl
+bin/httpdthread.tcl
+bin/tclhttpd.rc
+lib/tclhttpd/pkgIndex.tcl
+lib/tclhttpd/*.tcl (lots of files)
+lib/tcllib/pkgIndex.tcl
+lib/tcllib/* (lots of subdirectories)
+
+
