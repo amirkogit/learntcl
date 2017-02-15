@@ -1,0 +1,30 @@
+::itcl::class Date {
+    constructor {args} {
+      if {![llength $args]} {
+        set _date [clock format [clock seconds]]
+      } elseif {[llength $args] == 1} {
+        if {$args == "now" || $args == "current"} {
+          set _date [clock format [clock seconds]]
+        } elseif {$args == "tomorrow"} {
+          set currtime [clock seconds]
+          set _date \
+            [clock format [expr $currtime + $_ONEDAY] -format "%D"]
+        } elseif [regexp {^[1-9]*$} $args] {
+          set _date [clock format $args]
+        } else {
+          # Error condition. Throw an error to auto-delete the object.
+          error "Invalid date specification: \"$args\""
+        }
+      } elseif {$args == "2 days ago"} {
+        set currtime [clock seconds]
+        set _date [clock format \
+          [expr $currtime - [expr $_ONEDAY * 2]] -format "%D"]
+      } else {
+        # Error condition. Throw an error to auto-delete the object.
+        error "Invalid date specification: \"$args\""
+      }
+    }
+    public method date {} {return $_date}
+    private common _ONEDAY [expr 3600*24]
+    private variable _date
+  }

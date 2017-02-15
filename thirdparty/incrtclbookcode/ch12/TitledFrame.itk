@@ -1,0 +1,32 @@
+::itcl::class TitledFrame {
+  inherit ::itk::Widget
+
+  constructor {args} {}
+  public method options {} {
+    foreach option [configure] {
+      puts "option: [lindex [lindex $option 0] 0]"
+    }
+  }
+  public method remove {which_} {
+    itk_component delete $which_
+  }
+}
+
+::itcl::body TitledFrame::constructor {args} {
+  itk_component add title {
+    label $itk_interior.title
+  } {
+    keep -text
+  }
+
+  itk_component add frame {
+    frame $itk_interior.f
+  } {
+    keep -relief -borderwidth
+  }
+
+  pack $itk_component(title) -anchor w
+  pack $itk_component(frame) -fill both -expand 1
+  eval itk_initialize $args
+}
+

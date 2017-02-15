@@ -1,0 +1,3 @@
+wm title . timeentry
+iwidgets::timeentry .te -labeltext "Selected Time:"
+pack .te -pady 6 -padx 6

@@ -1,0 +1,102 @@
+#====================================================================
+# NOTE: This class is exactly the same as the one in Chapter 6
+# except all tracing/debug messages have been removed.
+#====================================================================
+
+::itcl::class ClientSocket {
+  # Class constructor/destructor
+  constructor {{host_ localhost} {port_ 20002}} {}
+  destructor {close $_socket}
+
+  # Class Methods
+  public method write {data_}
+  public method register {command_} {set _clientFunction $command_}
+  private method handleServerInput {}
+
+  # Class Data Members
+  private variable _socket
+  private variable _activated 0
+  private variable _clientFunction ""
+}
+
+
+#--------------------------------------------------------------------
+# CONSTRUCTOR
+#
+# Description:
+#   Try to connect to the ServerSocket object by opening a socket to
+#   the designated host and port number. Note that the default values
+#   are the same for both ClientSocket and ServerSocket. You only
+#   need to specify parameters for ClientSocket's constructor if you
+#   override the defaults for ServerSocket.
+# 
+# Input Parameters:
+#   host_: IP address of the computer on which the server is running
+#          - the default value is localhost
+#   port_: port number to which clients should connect - default
+#          value is 20002
+#
+# Return Values:
+#   TCL_OK or TCL_ERROR
+#--------------------------------------------------------------------
+::itcl::body ClientSocket::constructor {{host_ localhost} {port_ 20002}} {
+  # Connect with the socket opened by the ServerSocket object.
+  if {[catch {socket $host_ $port_} _socket]} {
+    return -code error
+  }
+
+  # When the server writes to the socket, handle its input.
+  fconfigure $_socket -buffering line
+  fileevent $_socket readable [::itcl::code $this handleServerInput]
+}
+
+
+#--------------------------------------------------------------------
+# PUBLIC METHOD write
+#
+# Description:
+#   Send a message to the server.
+#
+# Input Parameters:
+#   data_: message to send
+#
+# Return Values:
+#   TCL_OK or TCL_ERROR
+#--------------------------------------------------------------------
+::itcl::body ClientSocket::write {data_} {
+  # If not activated, return an error.
+  if {!$_activated} {
+    return -code error 
+  }
+  puts $_socket $data_
+}
+
+
+
+#--------------------------------------------------------------------
+# PUBLIC METHOD handleServerInput
+#
+# Description:
+#   Handles input from the server, including handshaking and
+#   forwarding the data to an outside source for processing.
+#
+# Input Parameters:
+#   None
+#
+# Return Values:
+#   None
+#--------------------------------------------------------------------
+::itcl::body ClientSocket::handleServerInput {} {
+  if {[gets $_socket data] < 0} {
+    ::itcl::delete object $this
+  } elseif {$data == "registration requested"} {
+    puts $_socket "register me"
+  } elseif {$data == "connection established"} {
+    set _activated 1
+    uplevel #0 {set CONNECTION_ESTABLISHED 1}
+  } else {
+    if {[llength $_clientFunction]} {
+      $_clientFunction $data
+    }
+  }
+}

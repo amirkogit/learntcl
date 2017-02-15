@@ -1,0 +1,21 @@
+::itcl::class TraceTest2 {
+  constructor {} { 
+    set t [::itcl::local Trace2 #auto]
+    method1
+    method2
+    $t print COMM "Wow, this is easy!"
+    method3 
+  }
+  public method method1 {} {
+    set t [::itcl::local Trace2 #auto]
+    $t print ERR "This is an example of an error message."
+    method3 
+  }
+  private method method2 {} {
+    ::itcl::local Trace2 #auto
+  }
+  private method method3 {} {
+    set t [::itcl::local Trace2 #auto]
+    $t print WARN "This is a warning message." 
+  }
+}

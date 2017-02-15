@@ -1,0 +1,45 @@
+wm title . "Phonetic Alphabet Spinner"
+
+# Initialize a list for the spinner to loop over.
+set alphabet "alpha bravo charlie delta echo foxtrot golf hotel\
+  india juliett kilo lima mike november oscar papa quebec romeo\
+  sierra tango uniform victor whiskey xray yankee zulu"
+set index 6 
+
+# Description of spinner.
+message .m -text "Use the -decrement and -increment options to\
+  implement spinners that loop over specialized lists such as\
+  the phonetic alphabet." -width 250
+pack .m -padx 8 -pady 4
+
+# Create the spinner.
+iwidgets::spinner .sp -labeltext "Current selection:" -width 12 \
+  -decrement {spin .sp backward} -increment {spin .sp} \
+  -textbackground bisque
+.sp insert 0 [lindex $alphabet $index]
+pack .sp -pady 12
+
+# Spin the alphabet character forward or backward as specified
+# by the direction_ argument.
+proc spin {spinner_ {direction_ forward}} {
+  global index alphabet
+  if {$direction_ == "forward"} {
+    incr index
+  } elseif {$direction_ == "backward"} {
+    incr index -1
+  } else {
+    error "Bad argument: \"$direction_\". Should be backward or\
+      forward."
+  }
+
+  # Check boundary conditions.
+  if {$index == [llength $alphabet]} {
+    set index 0
+  } elseif {$index == -1} {
+    set index [expr [llength $alphabet] - 1]
+  }
+
+  # Out with the old and in with the new!
+  .sp clear
+  .sp insert 0 [lindex $alphabet $index]
+}

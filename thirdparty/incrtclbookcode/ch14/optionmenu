@@ -1,0 +1,10 @@
+# Create the optionmenu.
+iwidgets::optionmenu .op -labeltext "Select a day:"
+
+# Insert a bunch of entries.
+foreach day "Sun Mon Tues Wednes Thurs Fri Satur" {
+  .op insert end ${day}day
+}
+
+wm title . optionmenu
+pack .op

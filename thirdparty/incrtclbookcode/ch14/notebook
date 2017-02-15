@@ -1,0 +1,46 @@
+# Hide the root window until the notebook is ready.
+wm withdraw .
+
+# Create a scrollbar for scrolling through the notebook pages.
+scrollbar .sb -orient horizontal -command ".nb view" 
+
+# Create the notebook.
+iwidgets::notebook .nb -scrollcommand ".sb set" -height 200
+
+# Create a radiobox for selecting pages in the notebook as an
+# alternative to using the scrollbar.
+iwidgets::radiobox .rb
+.rb add page1 -text "Page 1"
+.rb add page2 -text "Page 2"
+.rb add page3 -text "Page 3"
+pack .rb -fill x
+update idletasks
+foreach page "page1 page2 page3" {
+  pack [.rb component $page] -side left -expand 1
+}
+
+# Create and fill in page 1. Note the pathname will likely not
+# exist on your system.
+set page1 [.nb add -label "Itcl Powered"]
+frame $page1.f -relief ridge -bd 3
+label $page1.f.img -relief ridge -bd 4 -image [image create photo \
+  -file "C:/tmp/itclpwrd.gif"]
+pack $page1.f.img -padx 16 -pady 16 -expand 1
+pack $page1.f -fill both -expand 1
+
+# Pages 2 and 3 are blank. You can add any kind of Tk widget or
+# [incr Widget] to the page childsites stored in $page2 and $page3.
+set page2 [.nb add -label blank2]
+pack [label $page2.l -text "Welcome to page 2!"] -expand 1
+set page3 [.nb add -label blank3]
+pack [label $page3.l -text "Welcome to page 3!"] -expand 1
+
+pack .nb -fill both -expand 1
+pack .sb -fill x
+
+# Configure the radiobox to select pages when the radiobuttons are
+# selected, select the first radiobutton to select the first page,
+# and draw the window.
+.rb configure -command {.nb select [.rb index [.rb get]]}
+.rb select 0; # This is equivalent to <.nb select "Itcl Powered">
+wm deiconify .

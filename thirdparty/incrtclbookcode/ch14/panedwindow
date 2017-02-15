@@ -1,0 +1,32 @@
+# Create the panedwindow.
+iwidgets::panedwindow .pw
+
+# Create three panes.
+.pw add top
+.pw add middle
+.pw add bottom
+
+# Create a Tk label widget in the top frame.
+set topcs [.pw childsite top]
+label $topcs.l \
+  -text "To pack widgets into a pane, use the panedwindow's"
+pack $topcs.l -expand 1
+
+# Create an entryfield [incr Widget] in the middle frame.
+set midcs [.pw childsite middle]
+iwidgets::entryfield $midcs.ef -width 40 -textbackground #d9d9d9
+$midcs.ef insert 0 "childsite method to get the Tk window pathname"
+pack $midcs.ef -expand 1
+
+# Create a scrolledtext [incr Widget] in the bottom frame.
+set botcs [.pw childsite bottom]
+iwidgets::scrolledtext $botcs.st -borderwidth 2
+$botcs.st insert 1.0 "of the pane's childsite frame. Then have at it!"
+pack $botcs.st -fill both -expand 1
+
+wm title . panedwindow
+wm geometry . 275x250
+
+# Configure the amount of screen real estate each pane gets.
+.pw fraction 20 20 60
+pack .pw -fill both -expand 1

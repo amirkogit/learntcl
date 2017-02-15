@@ -1,0 +1,4 @@
+# Create the canvasprintdialog and tell it to draw itself.
+iwidgets::canvasprintdialog .cpd -posterize 1 -hpagecnt 4 \
+  -vpagecnt 3 -textbackground ghostwhite
+.cpd activate

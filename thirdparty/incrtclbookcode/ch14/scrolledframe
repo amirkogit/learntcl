@@ -1,0 +1,73 @@
+# Create the scrolledframe.
+iwidgets::scrolledframe .sf -width 400 -height 175 \
+  -borderwidth 2 -sbwidth 17
+
+# Create a couple of entryfields to display the color name
+# and RGB value.
+iwidgets::entryfield .name -labeltext "Color Name: " -width 20 \
+  -labelfont -Adobe-Helvetica-Bold-R-Normal--*-140-*-*-*-*-*-* \
+  -textbackground grey40
+iwidgets::entryfield .rgb -labeltext "RGB Value: " -width 3 \
+  -labelfont -Adobe-Helvetica-Bold-R-Normal--*-140-*-*-*-*-*-* \
+  -textbackground grey40
+.name component entry configure -foreground white
+.rgb component entry configure -foreground white
+grid .name .rgb -sticky ew -padx 2 -pady 4
+
+# Get the childsite from the scrolledframe, open the color
+# definition file, and create colored squares in the childsite.
+# Note that the path may not exist on your system. A similar
+# file typically exists under /usr/openwin/lib on Unix systems.
+set cs [.sf childsite]
+set fid [open "C:/Program Files/exceed.95/user/rgb.txt" r]
+set num 1; set row 1; set column 1
+while {[gets $fid line] >= 0} { 
+  # Ignore anything that doesn't begin with a number.
+  if {![regexp {^[0-9]} $line]} {
+    continue
+  }
+
+  # Ignore this line if this color has already been displayed.
+  set rgb [lrange $line 0 2]
+  set name [lrange $line 3 end]
+  if {[info exists used($rgb)]} {
+    continue
+  } else {
+    set used($rgb) 1
+  }
+
+  # Create the squares 12 per row.
+  if {[expr $column % 12] == 0} {
+    incr row
+    set column 1
+  }
+
+  # Create the colored square.
+  frame $cs.$num -bg $name -relief ridge -bd 2 -width 25 -height 25
+  grid $cs.$num -row $row -column $column -padx 4 -pady 4
+
+  # Update the entryfields when the cursor enters and leaves frames.
+  bind $cs.$num <Enter> "updateInfo [list $name $rgb 1]"
+  bind $cs.$num <Leave> "updateInfo [list $name $rgb]"
+
+  incr num; incr column
+
+  # No need to show more than 10 rows in this example.
+  if {$num == 120} {
+    break
+  }
+} 
+close $fid
+
+# Set the window title and pack the scrolledframe.
+wm title . "Color Chooser"
+grid .sf -columnspan 2 -sticky nsew
+
+# This procedure updates the entryfields each time a <Enter> or
+# <Leave> event is detected over one of the colored squares.
+proc updateInfo {name_ rgb_ {enter_ 0}} {
+  .name clear; .rgb clear
+  if {!$enter_} {return}
+  .name insert 0 $name_
+  .rgb insert 0 $rgb_
+}

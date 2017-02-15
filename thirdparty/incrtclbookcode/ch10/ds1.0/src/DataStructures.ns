@@ -1,0 +1,86 @@
+namespace eval DataStructures {
+  package require Itcl
+
+  # Use this procedure to instantiate the corresponding class.
+  proc create {what_} {
+    switch -- $what_ {
+      linkedlist    {return [namespace current]::[LinkedList #auto]}
+      tree          {}
+      circularqueue {}
+      stack         {}
+    }
+  } 
+
+  # LinkedList Class Definition
+  itcl::class LinkedList {
+    public method add {data_}
+    public method delete {data_}
+    public method exists {data_}
+    public method isEmpty {} {return [expr 0 == [llength $_nodes]]}
+    public method print {}
+
+    private variable _nodes ""
+  }
+
+  # Node Class Definition
+  itcl::class Node {
+    constructor {data_} {set _data $data_}
+
+    public method get {} {return $_data}
+    public method next {} {return $_next}
+    public method prev {} {return $_prev}
+    public method hook {direction_ node_} {set _${direction_} $node_}
+
+    private variable _data
+    private variable _next 0
+    private variable _prev 0
+  }
+
+  itcl::body LinkedList::add {data_} {
+    set newLink [DataStructures::Node #auto $data_]
+    if ![llength $_nodes] {
+      lappend _nodes $newLink 
+      return
+    }
+
+    set tail [lindex $_nodes end]
+    $tail hook next $newLink
+    $newLink hook prev $tail
+    lappend _nodes $newLink 
+    return
+  }
+
+  itcl::body LinkedList::delete {data_} {
+    foreach node $_nodes {
+      if {[$node get] == $data_} {
+        set next [$node next]
+        set prev [$node prev]
+        if {$next != "0"} {
+          $next hook prev $prev
+        }
+        if {$prev != "0"} {
+          $prev hook next $next
+        }
+        itcl::delete object $node
+        set index [lsearch $_nodes $node]
+        set _nodes [lreplace $_nodes $index $index]
+      }
+    }
+  }
+
+  itcl::body LinkedList::exists {data_} {
+    foreach node $_nodes {
+      if {[$node get] == $data_} {
+        return 1
+      }
+    }
+    return 0
+  }
+
+  itcl::body LinkedList::print {} {
+    foreach node $_nodes {
+      puts -nonewline "[$node get] "
+    }
+    puts ""
+  }
+}

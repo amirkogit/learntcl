@@ -1,0 +1,22 @@
+::itcl::class DialogWindow {
+  # Class constructor and destructor 
+  constructor {message_} {
+    set _toplevelWindow [toplevel .top]
+    wm withdraw $_toplevelWindow
+    set _textMessage [label $_toplevelWindow.txt -text $message_]
+    set _okButton [button $_toplevelWindow.ok -text OK]
+  }
+  destructor {destroy .top}
+
+  # Class Methods
+  method draw {} {
+    pack $_textMessage -pady 8
+    pack $_okButton -pady 8 -ipadx 8
+    wm deiconify $_toplevelWindow
+  }
+
+  # Class Data Members
+  variable _toplevelWindow
+  variable _textMessage
+  variable _okButton
+}

@@ -1,0 +1,365 @@
+::itcl::class ChatRoomUser {
+  # Class constructor/destructor
+  constructor {name_ {host_ localhost} {port_ 21112}} {}
+  destructor {
+    catch {
+      ::itcl::delete object $_socket
+      destroy $_top
+    }
+  }
+
+  # Class Methods
+  public method activate {}
+  private method processServerInput {data_}
+  private method insertNewMsg {data_}
+  private method post {}
+  private method pause {}
+  private method whisper {}
+  private method buildScreen {}
+
+  # Class Data Members
+  private variable _socket        ; # ClientSocket object
+  private variable _top           ; # toplevel window
+  private variable _widgets       ; # array of widgets
+  private variable _name          ; # user name from LoginClient
+  private variable _paused 0      ; # boolean to pause chat session
+  private variable _whispering  0 ; # boolean to whisper to someone
+  private variable _whisperPartner; # user name of whisper partner
+  private variable _activated   0 ; # boolean for session activation
+}
+
+
+#--------------------------------------------------------------------
+# CONSTRUCTOR
+#
+# Description:
+#   Create the ClientSocket object and register a callback method if
+#   instantiation is successful.  Then build the main chat room
+#   graphical screen.
+#
+# Input Parameters:
+#   name_: chat room user's name
+#   host_: optional parameter - should be the IP address or symbolic
+#          name of the server workstation
+#   port_: optional parameter - should be the same as the server port
+#
+# Return Values:
+#   TCL_OK or TCL_ERROR
+#--------------------------------------------------------------------
+::itcl::body ChatRoomUser::constructor {name_ {host_ localhost} \
+{port_ 21112}} {
+  # If ClientSocket can't be instantiated, return immediately. 
+  if {[catch {ClientSocket #auto $host_ $port_} _socket]} {
+    error "Unable to open socket connection: $_socket"
+  }
+  set _name $name_
+  $_socket register [::itcl::code $this processServerInput]
+  if {[catch {buildScreen} err]} {
+    error $err
+  }
+  focus $_widgets(entry)
+
+  # Wait until handshaking is complete before returning.
+  tkwait variable CONNECTION_ESTABLISHED
+}
+
+
+#--------------------------------------------------------------------
+# PUBLIC METHOD activate
+#
+# Description:
+#   This method is used to log into the chat room.  The user's name
+#   is sent to the server as a new chatter, and the graphical chat
+#   screen is displayed.
+#
+# Input Parameters:
+#   None
+#
+# Return Values:
+#   None
+#--------------------------------------------------------------------
+::itcl::body ChatRoomUser::activate {} {
+  set _activated 1
+  $_socket write [list "new chatter" $_name]
+  $_widgets(ccLbox) insert 0 $_name
+  $_widgets(total) configure -text "Total: 1"
+  wm deiconify $_top
+}
+
+
+#--------------------------------------------------------------------
+# PRIVATE METHOD processServerInput
+#
+# Description:
+#   This method is invoked by the ClientSocket object when that
+#   object's socket connection becomes readable.  It is used to
+#   process input from the ChatServer. 
+#
+# Input Parameters:
+#   data_: the message from the ChatServer object
+#
+# Return Values:
+#   None
+#--------------------------------------------------------------------
+::itcl::body ChatRoomUser::processServerInput {data_} {
+  if {!$_activated} {
+    return
+  }
+  set protocolString [lindex $data_ 0]
+  switch -- $protocolString {
+    "current chatters" {
+      # This ChatRoomUser object has just been activated and has
+      # requested to register with the server. The server has in
+      # response sent a list of all current chat room users.
+      foreach name [lindex $data_ end] {
+        $_widgets(ccLbox) insert end $name
+      }
+      $_widgets(total) configure \
+        -text "Total: [expr [llength [lindex $data_ end]]+ 1]"
+    }
+
+    "new chatter" {
+      # A new user has logged into the chat room. Since this data
+      # is broadcast, only insert the name if it doesn't match _name.
+      if {[lindex $data_ end] != $_name} {
+        $_widgets(ccLbox) insert end [lindex $data_ end]
+        set currTotal [lindex [$_widgets(total) cget -text] end]
+        $_widgets(total) configure \
+          -text "Total: [expr $currTotal + 1]"
+      }
+    }
+
+    "server: remove" {
+      # A user has logged off of the chat room. Remove the name from
+      # the "Current Chatters" listbox.
+      set size [$_widgets(ccLbox) size]
+      for {set index 0} {$index < $size} {incr index} {
+        if {[$_widgets(ccLbox) get $index] == [lindex $data_ end]} {
+          $_widgets(ccLbox) delete $index
+          set currTotal [lindex [$_widgets(total) cget -text] end]
+          $_widgets(total) configure \
+            -text "Total: [expr $currTotal - 1]"
+        }
+      }
+    }
+
+    default {
+      # This is either a new posting or a message from the server
+      # directed to this instance. Put it in the message window
+      # if not currently paused.
+      if {!$_paused} {
+        insertNewMsg $data_
+      }
+    }
+  }
+}
+
+
+#--------------------------------------------------------------------
+# PRIVATE METHOD insertNewMsg
+#
+# Description:
+#   Insert a new message in the listbox.  It can be a new posting or
+#   a message sent by the server such as when whispering is used.
+#
+# Input Parameters:
+#   data_: the message from the ChatServer object
+#
+# Return Values:
+#   None
+#--------------------------------------------------------------------
+::itcl::body ChatRoomUser::insertNewMsg {data_} {
+  $_widgets(csLbox) insert end $data_
+  $_widgets(csLbox) see end
+}
+
+
+#--------------------------------------------------------------------
+# PRIVATE METHOD post
+#
+# Description:
+#   Request a new message to be posted to the chat room.  The message
+#   is sent to the server for validation prior to posting.
+#
+# Input Parameters:
+#   None
+#
+# Return Values:
+#   None
+#--------------------------------------------------------------------
+::itcl::body ChatRoomUser::post {} {
+  set data [$_widgets(entry) get]
+  if {$data == ""} {
+    return
+  }
+  $_socket write $data
+  $_widgets(entry) delete 0 end
+}
+
+
+#--------------------------------------------------------------------
+# PRIVATE METHOD pause
+#
+# Description:
+#   Pauses input into the listbox.  This can be done, for example, to
+#   catch up on old posts if messages are sent too quickly to read.
+#   When paused, the Pause button is changed to read Resume.
+#
+# Input Parameters:
+#   None
+#
+# Return Values:
+#   None
+#--------------------------------------------------------------------
+::itcl::body ChatRoomUser::pause {} {
+  set _paused [expr $_paused == 0]
+  if {$_paused} {
+    insertNewMsg "  -- CHAT SESSION PAUSED --"
+    $_widgets(pause) configure -text Resume
+  } else {
+    insertNewMsg "  -- CHAT SESSION RESUMED --"
+    $_widgets(pause) configure -text Pause
+  }
+}
+
+
+#--------------------------------------------------------------------
+# PRIVATE METHOD whisper
+#
+# Description:
+#   This method is used to set up a private chat session with another
+#   chatter.  When whispering, messages between the two chatters are
+#   only seen on each other's screen.
+#
+# Input Parameters:
+#   None
+#
+# Return Values:
+#   None
+#--------------------------------------------------------------------
+::itcl::body ChatRoomUser::whisper {} {
+  # If currently whispering, return to broadcast mode.
+  if {$_whispering} {
+    set _whispering 0
+    $_socket write [list "whisper off" $_whisperPartner]
+    insertNewMsg "  -- WHISPER MODE TERMINATED --"
+    $_widgets(whisper) configure -text Whisper
+    return
+  }
+
+  # Ignore if no user name is highlighted.
+  set index [$_widgets(ccLbox) curselection]
+  if {$index == ""} {
+    insertNewMsg "  -- PLEASE SELECT A CHATTER FIRST --"
+    return
+  }
+
+  # Ignore if highlighted name is self.
+  set _whisperPartner [$_widgets(ccLbox) get $index]
+  if {$_whisperPartner == $_name} {
+    insertNewMsg "  -- YOU CAN'T WHISPER TO YOURSELF --"
+    return
+  }
+
+  set _whispering [expr $_whispering == 0]
+  if {$_whispering} {
+    $_socket write [list "whisper on" $_whisperPartner]
+    insertNewMsg \
+      "  -- WHISPER MODE ESTABLISHED WITH $_whisperPartner --"
+    $_widgets(whisper) configure -text Broadcast
+  } else {
+    $_socket write [list "whisper off" $_whisperPartner]
+    insertNewMsg "  -- WHISPER MODE TERMINATED --"
+    $_widgets(whisper) configure -text Whisper
+  }
+}
+
+
+#--------------------------------------------------------------------
+# PRIVATE METHOD buildScreen
+#
+# Description:
+#   Builds the main chat screen.
+#
+# Input Parameters:
+#   None
+#
+# Return Values:
+#   TCL_ERROR or TCL_OK
+#--------------------------------------------------------------------
+::itcl::body ChatRoomUser::buildScreen {} {
+  # Create the toplevel window. If this window name already
+  # exists, return an error.
+  set _top .[namespace tail $this]
+  if {[winfo exists $_top]} {
+    error "Failed to create toplevel window.\
+      Window name \"$_top\" exists."
+  }
+  toplevel $_top
+  wm title $_top "Welcome to the Chat Room!"
+  wm withdraw $_top
+  wm minsize $_top 500 150
+
+  # ----------------------------------------
+  # Create the buttons (bb = "button box") and pack them first.
+  # ----------------------------------------
+  set bb [frame $_top.bottom -relief ridge -bd 4]
+  set b1 [button $bb.b1 -text Post -command [::itcl::code $this post]]
+  set _widgets(whisper) [button $bb.b2 -text Whisper \
+    -command [::itcl::code $this whisper]]
+  set _widgets(pause) [button $bb.b3 -text Pause \
+    -command [::itcl::code $this pause]]
+  set b4 [button $bb.b4 -text "Log Off" \
+    -command "::itcl::delete object $this"]
+  pack $b1 $_widgets(whisper) $_widgets(pause) $b4 \
+    -ipadx 4 -ipady 2 -side left -expand 1
+  pack $bb -ipady 5 -fill both -side bottom
+
+  # ----------------------------------------
+  # Create the entry field for talking (tf = "talk frame").
+  # ----------------------------------------
+  set mid     [frame $_top.middle -relief ridge -bd 4]
+  set tf      [frame $mid.f]
+  set tfLabel [label $tf.talk -text "Talk: "]
+  set _widgets(entry) [entry $tf.e -bg grey40 -fg green \
+    -insertbackground green]
+  bind $_widgets(entry) <Return> [::itcl::code $this post]
+  pack $tfLabel         -side left -anchor w -padx 6
+  pack $_widgets(entry) -side left -fill x -expand 1 -pady 6
+  pack $tf $mid         -fill both -side bottom
+
+  # ----------------------------------------
+  # Create the current chatters listbox area
+  # (cc = "current chatters").
+  # ----------------------------------------
+  set topFrame         [frame $_top.top -relief ridge -bd 4]
+  set ccFrame          [frame $topFrame.left -relief ridge -bd 4]
+  set ccLabel          [label $ccFrame.l -text "Current Chatters:"]
+  set ccLboxFrame      [frame $ccFrame.f -relief ridge -bd 2]
+  set _widgets(ccLbox) [listbox $ccLboxFrame.lbox -bg ghostwhite \
+    -width 20 -selectmode single -exportselection 0]
+  set _widgets(total)  [label $ccFrame.total -relief ridge \
+    -bd 2 -anchor w]
+  pack $ccLabel                       -anchor w
+  grid $_widgets(ccLbox)              -sticky nsew
+  pack $ccLboxFrame                   -fill both -expand 1
+  pack $_widgets(total)               -anchor w -fill x
+  pack $ccFrame                       -fill both -expand 1 -side left
+  grid columnconfigure $ccLboxFrame 0 -weight 1
+  grid rowconfigure $ccLboxFrame 0    -weight 1
+  grid columnconfigure $_widgets(ccLbox) 0 -weight 1
+  grid rowconfigure $_widgets(ccLbox)    0 -weight 1
+
+  # ----------------------------------------
+  # Create the listbox area to display the chat session
+  # (cs = "chat session").
+  # ----------------------------------------
+  set csLboxFrame      [frame $topFrame.right -relief ridge -bd 2]
+  set _widgets(csLbox) [listbox $csLboxFrame.lbox -bg ghostwhite \
+    -width 70]
+  grid $_widgets(csLbox)              -sticky nsew
+  pack $csLboxFrame                   -side left -fill both -expand 1
+  pack $topFrame                      -fill both -expand 1
+  grid columnconfigure $csLboxFrame 0 -weight 1
+  grid rowconfigure $csLboxFrame 0    -weight 1
+}

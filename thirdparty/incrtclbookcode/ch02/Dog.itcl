@@ -1,0 +1,15 @@
+::itcl::class Dog {
+  # Class Methods
+  public method sit {} {
+    puts "Sitting!"
+  }
+  protected method bark {} {
+    puts "Woof!"
+  }
+  protected method rollover {} {
+    puts "Rolling over!"
+  }
+  protected method scratch {} {
+    puts "I need a flea collar!"
+  }
+}

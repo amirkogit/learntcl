@@ -1,0 +1,13 @@
+# Create the scrolledtext.
+iwidgets::scrolledtext .st -labeltext "Tcl README file" \
+  -labelfont -Adobe-Helvetica-Bold-R-Normal--*-140-*-*-*-*-*-* \
+  -visibleitems 60x24
+pack .st -fill both -expand 1
+
+# Import the Tcl README file. Note this path may not exist
+# on your system.
+.st import "C:/Program Files/Tcl/readme.txt"
+
+# Scroll down so that the [incr Tcl] info is visible.
+update idletasks
+.st see 43.0

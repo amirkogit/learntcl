@@ -1,0 +1,37 @@
+# Create the scrolledcanvas.
+iwidgets::scrolledcanvas .sc -textbackground ghostwhite \
+  -borderwidth 2 -width 520 -height 125 \
+  -vscrollmode dynamic -hscrollmode dynamic
+
+# Add a bunch of canvas images to create an icon viewer.
+set dir ${iwidgets::library}/demos/images
+set icons [glob $dir/*.gif]; # list of gif files
+set xpad 10; set ypad 25   ; # x and y padding distances between items
+set rightside 0            ; # x coord of right side of rightmost icon
+set x 0                    ; # current x coordinate (center of icon)
+set img 0                  ; # photo image number
+
+foreach icon $icons {
+  # Create the photo image with a unique number.
+  image create photo gif$img -file $icon
+
+  # Use the simple filename as the canvas tag.
+  set tag [lindex [file split [file rootname $icon]] end]
+
+  # Calculate the new (x,y) coordinates.
+  set halfwidth [expr [image width gif$img] / 2]
+  set x [expr $halfwidth + $xpad + $rightside]
+  set y [expr ([image height gif$img] / 2) + $ypad]
+
+  # Create the image on the canvas and put its tagname beneath it.
+  .sc create image $x $y -image gif$img -tag $tag
+  .sc create text $x [expr [image height gif$img] + $ypad + 10] \
+    -text $tag
+
+  # Get ready for the next iteration.
+  set rightside [expr $x + $halfwidth]
+  incr img
+}
+
+wm title . "Icon Viewer"
+pack .sc -fill both -expand 1

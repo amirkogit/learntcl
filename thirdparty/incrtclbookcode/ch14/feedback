@@ -1,0 +1,12 @@
+# Create the feedback.
+iwidgets::feedback .fb -steps 50 -labeltext "Extracting files..." \
+  -barcolor gray
+wm geometry . 225x75
+pack .fb -fill x
+
+# Add a border by manipulating the hull.
+.fb component hull configure -relief ridge -bd 3
+
+# Increase the status bar to 70% complete.
+update idletasks
+.fb step 35

@@ -1,0 +1,27 @@
+::itcl::class DialogWindow {
+  # Class constructor and destructor
+  constructor {message_} {
+    set _toplevelWindow [toplevel .top]
+    wm withdraw $_toplevelWindow
+    set _textFrame [frame $_toplevelWindow.txtFrame]
+    set _textMessage [label $_textFrame.txt -text $message_]
+    set _separator [frame $_toplevelWindow.sep -height 3 -bd 2 -relief sunken]
+  }
+  destructor {
+    destroy $_toplevelWindow
+  }
+
+  # Class Methods
+  protected method draw {} {
+    pack $_textMessage -side right -expand 1
+    pack $_textFrame -fill both -pady 8 -padx 12
+    pack $_separator -fill both -pady 12
+  }
+
+  # Class Data Members
+  protected variable _toplevelWindow
+  protected variable _textFrame
+  protected variable _bitmap
+  protected variable _textMessage
+  protected variable _separator 
+}

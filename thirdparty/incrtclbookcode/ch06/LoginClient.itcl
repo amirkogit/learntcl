@@ -1,0 +1,174 @@
+::itcl::class LoginClient {
+  # Class constructor/destructor
+  constructor {} {}
+  destructor {
+    catch {
+      destroy $_toplevel
+      ::itcl::delete object $_clientSocket
+    }
+  }
+
+  # Class Methods
+  public method draw {} {wm deiconify $_toplevel}
+  protected method process {data_}
+  private method createClientSocket {}
+  private method createMainScreen {}
+  private method requestLogin {}
+
+  # Class Data Members
+  private variable _toplevel
+  private variable _clientSocket
+  private variable _password ""
+  private variable _username ""
+}
+
+
+#--------------------------------------------------------------------
+# CONSTRUCTOR
+#
+# Description:
+#   Attempt to connect to the login server via ClientSocket object. 
+#   If successful, create the main login screen.
+# 
+# Input Parameters:
+#   None
+#
+# Return Values:
+#   TCL_OK or TCL_ERROR
+#--------------------------------------------------------------------
+::itcl::body LoginClient::constructor {} {
+  Trace::EXE begin
+  # Create the socket for sending login request to server.
+  if {[catch {createClientSocket} err]} {
+    Trace::ERR "Failed to create client socket: - $err"
+    Trace::EXE end
+    return -code error
+  }
+  # Socket creation succeeded.  Create login screen.
+  createMainScreen
+  Trace::EXE end
+}
+
+
+#--------------------------------------------------------------------
+# PROTECTED METHOD process
+#
+# Description:
+#   This method is invoked by the ClientSocket object to handle
+#   input from the server. If the login request is successful, this
+#   method allows access to the rest of the application.  
+# 
+# Input Parameters:
+#   data_: message from the LoginMgr object
+#
+# Return Values:
+#   None
+#--------------------------------------------------------------------
+::itcl::body LoginClient::process {data_} {
+  Trace::EXE begin
+  if {$data_ == "access granted"} {
+    Trace::COMM "Login is successful!"
+    # Place code here to continue with the application.
+  } else {
+    Trace::WARN "Login failed!"
+  }
+  Trace::EXE end
+}
+
+
+#--------------------------------------------------------------------
+# PRIVATE METHOD createClientSocket
+#
+# Description:
+#   Create an instance of the ClientSocket class. If successful,
+#   register the process method with the client to be invoked when
+#   input from the server is received.
+# 
+# Input Parameters:
+#   None
+#
+# Return Values:
+#   TCL_OK or TCL_ERROR
+#--------------------------------------------------------------------
+::itcl::body LoginClient::createClientSocket {} {
+  Trace::EXE begin
+  Trace::COMM "Creating client socket..."
+  if {[catch {ClientSocket #auto} _clientSocket]} {
+    Trace::ERR "Failed to open client socket: $_clientSocket"
+    Trace::EXE end
+    return -code error
+  }
+  Trace::COMM "Succeeded. Registering processing method..."
+  # Register a method for handling server responses.
+  $_clientSocket register [::itcl::code $this process]
+  Trace::EXE end
+}
+
+
+#--------------------------------------------------------------------
+# PRIVATE METHOD createMainScreen
+#
+# Description:
+#   Create the main login screen for entering the username and
+#   password.
+# 
+# Input Parameters:
+#   None
+#
+# Return Values:
+#   None
+#--------------------------------------------------------------------
+::itcl::body LoginClient::createMainScreen {} {
+  Trace::EXE begin
+  set _toplevel [toplevel .[namespace tail $this]]
+  wm withdraw $_toplevel
+  wm resizable $_toplevel 0 0
+
+  label $_toplevel.name -text "User Name:"
+  entry $_toplevel.nametxt -width 12 \
+    -textvariable [::itcl::scope _username]
+
+  label $_toplevel.pswd -text "Password:"
+  entry $_toplevel.pswdtxt -show * -width 12 \
+    -textvariable [::itcl::scope _password]
+
+  frame $_toplevel.sep -height 4 -relief sunken -bd 2
+  button $_toplevel.ok -text OK \
+    -command [::itcl::code $this requestLogin]
+  button $_toplevel.cancel -text Cancel \
+    -command "::itcl::delete object $this"
+
+  grid $_toplevel.name $_toplevel.nametxt -pady 4
+  grid $_toplevel.pswd $_toplevel.pswdtxt
+  grid configure $_toplevel.pswd -sticky w
+  grid $_toplevel.sep -sticky ew -pady 12 -columnspan 2
+  grid $_toplevel.ok $_toplevel.cancel -pady 4
+  Trace::EXE end
+}
+
+
+#--------------------------------------------------------------------
+# PRIVATE METHOD requestLogin
+#
+# Description:
+#   Invoked when the 'OK' button on the login screen is pressed to
+#   send a message to the server for validating the login information.
+# 
+# Input Parameters:
+#   None
+#
+# Return Values:
+#   None
+#--------------------------------------------------------------------
+::itcl::body LoginClient::requestLogin {} {
+  Trace::EXE begin
+  # Return if nothing is entered.
+  if {$_username == "" || $_password == ""} {
+    Trace::COMM "Username and password must be entered."
+    Trace::EXE end
+    return
+  }
+  # Send the request.
+  $_clientSocket write "login $_username $_password"
+  Trace::EXE end
+}

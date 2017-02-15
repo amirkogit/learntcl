@@ -1,0 +1,8 @@
+# Create the scrolledhtml.
+iwidgets::scrolledhtml .sh -fontsize large -linkhighlight grey70 \
+  -width 450 -height 350
+pack .sh -fill both -expand 1
+
+# Load the scrolledhtml HTML-formatted man page.
+set dir ${iwidgets::library}/demos/html 
+.sh import $dir/scrolledhtml.n.html

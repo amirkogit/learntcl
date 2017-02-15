@@ -1,0 +1,20 @@
+# Create a scrolledtext to associate with the finddialog and import
+# a file into the text component. Note that the pathname may not
+# exist on your system.
+iwidgets::scrolledtext .st
+.st import ${iwidgets::library}/scripts/finddialog.itk
+pack .st -fill both -expand 1
+wm title . "A scrolledtext \[incr Widget\] tied to the finddialog."
+
+# Create the finddialog.
+iwidgets::finddialog .fd -textwidget .st
+.fd activate
+
+# Find the implementation body of the find method. Turn on case
+# sensitivity and use a regular expression since you may not know
+# if there are any parameters. Note that the regexp doesn't take
+# into consideration optional arguments.
+.fd component case select
+.fd component regexp select
+.fd component pattern insert 0 "(:find {\[a-z\]*} {)$"
+.fd find

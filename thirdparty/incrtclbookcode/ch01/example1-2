@@ -1,0 +1,21 @@
+# Rearranging the class definition works but is hard to
+# read and maintain.  You should always organize the
+# class definition in logical groups.
+
+::itcl::class DialogWindow {
+  variable _textMessage
+  destructor {destroy .top}
+  method draw {} {
+    pack $_textMessage -pady 8
+    pack $_okButton -pady 8 -ipadx 8
+    wm deiconify $_toplevelWindow
+  } 
+  variable _toplevelWindow
+  constructor {message_} {
+    set _toplevelWindow [toplevel .top]
+    wm withdraw $_toplevelWindow
+    set _textMessage [label $_toplevelWindow.txt -text $message_]
+    set _okButton [button $_toplevelWindow.ok -text OK]
+  }
+  variable _okButton
+}

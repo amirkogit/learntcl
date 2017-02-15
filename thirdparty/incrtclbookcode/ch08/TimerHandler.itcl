@@ -1,0 +1,15 @@
+::itcl::class TimerHandler {
+  # Class constructor
+  constructor {upperLimit_} {set _upperLimit $upperLimit_}
+
+  # Class Methods
+  public method start {} {count}
+  public method stop {} {after cancel $_afterId}
+  protected method count {}
+
+  # Class Data Members
+  protected variable _upperLimit
+  protected variable _action
+  protected variable _afterId
+  protected variable _elapsedTime 0
+}

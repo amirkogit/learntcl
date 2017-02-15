@@ -1,0 +1,12 @@
+namespace eval FurnitureStore {
+  proc preOrder {} {
+    set lamp [Manufacturer::livingRoom lamp]
+    if {[catch {$lamp turnOn} err]} {
+      puts "Lamp test failed: $err"
+    } else {
+      puts "Lamp test passed!"
+    }
+  }
+  proc buy {quantity_} {}
+  proc sell {} {}
+}

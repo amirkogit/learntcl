@@ -1,0 +1,244 @@
+::itcl::class ServerSocket {
+  # Class constructor/destructor
+  constructor {{port_ 20002}} {}
+  destructor {
+    catch {close $_socket}
+    foreach clientSocket $_activeClients {
+      catch {close $clientSocket}
+    }
+  }
+
+  # Class Methods
+  public method activate {command_}
+  public method write {sd_ data_}
+  public method broadcast {data_}
+  private method accept {sd_ address_ port_}
+  private method handleClientInput {sd_}
+  private method disconnect {sd_}
+
+  # Class Data Members
+  private variable _socket
+  private variable _activeClients
+  private variable _serverFunction
+  private variable _active 0
+}
+
+
+#--------------------------------------------------------------------
+# CONSTRUCTOR
+#
+# Description:
+#   Open a server socket and register a method to be invoked when
+#   clients attempt to connect to the socket.
+# 
+# Input Parameters:
+#   port_: port number to which clients should connect - default
+#          value is 20002
+#
+# Return Values:
+#   TCL_OK or TCL_ERROR
+#--------------------------------------------------------------------
+::itcl::body ServerSocket::constructor {{port_ 20002}} {
+  Trace::EXE begin
+  # Open the physical socket.
+  if {[catch {
+    socket -server [::itcl::code $this accept] $port_
+  } _socket]} {
+    Trace::ERR "Could not create socket: $_socket"
+    Trace::EXE end
+    return -code error
+  }
+  Trace::EXE end
+}
+
+
+#--------------------------------------------------------------------
+# PUBLIC METHOD activate
+#
+# Description:
+#   Activate the ServerSocket object.  Clients cannot connect until
+#   the server is activated.
+#
+# Input Parameters:
+#   command_: properly scoped method or procedure to invoke for
+#             handling client requests
+#
+# Return Values:
+#   None
+#--------------------------------------------------------------------
+::itcl::body ServerSocket::activate {command_} {
+  Trace::EXE begin
+  set _serverFunction $command_
+  set _active 1
+  Trace::COMM \
+    "Server is activated and ready to accept client messages."
+  Trace::EXE end
+}
+
+
+#--------------------------------------------------------------------
+# PUBLIC METHOD write
+#
+# Description:
+#   Send data to a specific client.
+#
+# Input parameters:
+#   sd_: client's socket descriptor
+#   data_: message to send to the client
+#
+# Return Values:
+#   TCL_OK or TCL_ERROR
+#--------------------------------------------------------------------
+::itcl::body ServerSocket::write {sd_ data_} {
+  Trace::EXE begin
+  if {[catch {puts $sd_ $data_} err]} {
+    Trace::ERR "Failed to forward message to client: --> $err"
+    Trace::EXE end
+    error $err
+  }
+  Trace::EXE end
+}
+
+
+#--------------------------------------------------------------------
+# PUBLIC METHOD broadcast
+#
+# Description:
+#   Broadcast a message to all clients.
+#
+# Input parameters:
+#   data_: message to broadcast
+#
+# Return Values:
+#   TCL_OK or TCL_ERROR
+#--------------------------------------------------------------------
+::itcl::body ServerSocket::broadcast {data_} {
+  Trace::EXE begin
+  foreach client $_activeClients {
+    if {[catch {puts $client $data_} err]} {
+      error $err
+    }
+  }
+  Trace::EXE end
+}
+
+
+#--------------------------------------------------------------------
+# PRIVATE METHOD accept
+#
+# Description:
+#   Automatically invoked when a client attempts to connect to the
+#   server.  If the server is not activated, close the socket.
+#   Otherwise, register the handleClientInput method to be invoked
+#   whenever the socket becomes readable.
+#
+# Input parameters:
+#   sd_: client's socket descriptor
+#   address_: client's IP address
+#   port_: client's port number
+#
+# Return Values:
+#   None
+#--------------------------------------------------------------------
+::itcl::body ServerSocket::accept {sd_ address_ port_} {
+  Trace::EXE begin
+  # Close the socket if the server's not activated yet. This causes
+  # the ClientSocket object to delete itself.
+  if {!$_active} {
+    Trace::ERR "Server not activated, closing client socket $sd_..."
+    close $sd_
+    Trace::EXE end
+    return
+  }
+
+  # Configure the socket to automatically flush when newline
+  # characters are detected and set up a callback method to be
+  # invoked when the socket becomes readable.
+  fconfigure $sd_ -buffering line
+  fileevent $sd_ readable [::itcl::code $this handleClientInput $sd_]
+
+  Trace::COMM \
+    "Accepted new client connection from $address_, port $port_"
+  Trace::COMM "Asking client to register..."
+  puts $sd_ "registration requested"
+  Trace::EXE end
+}
+
+
+#--------------------------------------------------------------------
+# PRIVATE METHOD handleClientInput
+#
+# Description:
+#   Automatically invoked when the socket becomes readable. Handles
+#   all client requests, including handshaking and forwarding to an
+#   outside source for processing.
+#
+# Input parameters:
+#   sd_: client's socket descriptor
+#
+# Return Values:
+#   None
+#--------------------------------------------------------------------
+::itcl::body ServerSocket::handleClientInput {sd_} {
+  Trace::EXE begin
+  Trace::COMM \
+    "Servicing new client message detected on socket $sd_..."
+  if {[catch {gets $sd_ data} rc]} {
+    disconnect $sd_
+    Trace::EXE end
+    return
+  }
+
+  if {$rc > 0} {
+    if {$data == "register me"} {
+      Trace::COMM "Client is requesting registration."
+      puts $sd_ "connection established"
+      lappend _activeClients $sd_
+    } else {
+      # Make sure this client is already registered.
+      if {[lsearch $_activeClients $sd_] == -1} {
+        Trace::ERR "This client is not registered! Closing socket!"
+        close $sd_
+      } else {
+        # Send the request to the server function.
+        Trace::COMM "Forwarding client request for processing..."
+        eval $_serverFunction [list $data] $sd_
+      }
+    }
+  } else {
+    # Client end of socket has been closed. Close this side
+    # and remove the client from the active list.
+    Trace::WARN \
+      "Loss of connection detected on $sd_. Closing socket..."
+    disconnect $sd_
+  }
+  Trace::EXE end
+}
+
+
+#--------------------------------------------------------------------
+# PRIVATE METHOD disconnect
+#
+# Description:
+#   Evaluate the designated procedure or method that a client has
+#   been lost, close the socket, and remove the client from the list
+#   of active clients.
+#
+# Input parameters:
+#   sd_: client's socket descriptor
+#
+# Return Values:
+#   None
+#--------------------------------------------------------------------
+::itcl::body ServerSocket::disconnect {sd_} {
+  Trace::EXE begin
+  # This is a hook to notify any attached servers that this
+  # socket descriptor is corrupted or has been closed.
+  eval $_serverFunction disconnectingSocket $sd_
+
+  Trace::COMM "Disconnecting socket $sd_..."
+  set index [lsearch $_activeClients $sd_]
+  set _activeClients [lreplace $_activeClients $index $index]
+  close $sd_
+  Trace::EXE end
+}

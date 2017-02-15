@@ -1,0 +1,19 @@
+namespace eval Manufacturer {
+  package require Itcl
+
+  itcl::class Lamp {
+    public method turnOn  {} {puts "on"}
+    public method turnOff {} {puts "off"}
+  }
+  itcl::class EndTable {}
+  itcl::class Couch {}
+
+  proc livingRoom {which_} {
+    switch -- $which_ {
+      lamp     {return [namespace current]::[Lamp #auto]}
+      endTable {return [namespace current]::[EndTable #auto]}
+      couch    {return [namespace current]::[Couch #auto]}
+      default  {return "We don't sell that."}
+    }
+  }
+}

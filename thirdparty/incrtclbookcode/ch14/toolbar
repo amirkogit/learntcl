@@ -1,0 +1,17 @@
+wm title . toolbar
+
+# Create the toolbar.
+iwidgets::toolbar .tb
+
+# Add some text editing buttons.
+set dir ${iwidgets::library}/demos/images
+.tb add button copy -balloonstr "Copy to clipboard" \
+  -image [image create photo -file $dir/copy.gif]
+.tb add button paste -balloonstr "Paste from clipboard" \
+  -image [image create photo -file $dir/paste.gif]
+.tb add button cut -balloonstr "Cut selected text" \
+  -image [image create photo -file $dir/cut.gif]
+.tb add button erase -balloonstr "Erase selected text" \
+  -image [image create photo -file $dir/clear.gif]
+
+pack .tb -padx 18 -pady 12

@@ -1,0 +1,32 @@
+::itcl::class SocketHandler {
+  # Class constructor/destructor
+  constructor {sd_} {}
+  destructor {catch {close $_sd}}
+
+  # Class Methods
+  protected method connect {host_ port_}
+  protected method handleServerInput {}
+
+  # Class Data Members
+  protected variable _sd 
+}
+
+
+::itcl::body SocketHandler::constructor {sd_} {
+  set _sd $sd_
+  fconfigure $_sd -buffering line
+  fileevent $_sd readable [::itcl::code $this handleServerInput]
+}
+
+
+::itcl::body SocketHandler::connect {host_ port_} {
+  if {[catch {socket $host_ $port_} _sd]} {
+    puts "Failed to reconnect."
+    return -code error
+  } else {
+    puts "Connection is re-established!"
+    fconfigure $_sd -buffering line
+    fileevent $_sd readable [::itcl::code $this handleServerInput]
+  }
+}
+

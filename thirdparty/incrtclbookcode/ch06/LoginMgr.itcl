@@ -1,0 +1,75 @@
+::itcl::class LoginMgr {
+  constructor {} {}
+
+  # Class Methods
+  protected method authenticate {data_ sd_}
+
+  # Class Data Members 
+  protected variable _serverSocket
+  protected variable _validIds
+}
+
+
+#--------------------------------------------------------------------
+# CONSTRUCTOR
+#
+# Description:
+#   Create a ServerSocket object and initialize valid usernames and
+#   passwords if successful. Then activate the server with the
+#   authenticate method.
+# 
+# Input Parameters:
+#   None
+#
+# Return Values:
+#   TCL_OK or TCL_ERROR
+#--------------------------------------------------------------------
+::itcl::body LoginMgr::constructor {} {
+  Trace::EXE begin
+  if {[catch {ServerSocket #auto 20002} _serverSocket]} {
+    Trace::ERR "Unable to create socket: $_serverSocket"
+    Trace::EXE end
+    return -code error
+  }
+  set _validIds(lyle_stavast) mr.admin
+  set _validIds(don_hurd) toolsguy
+  set _validIds(csmith) itclguy
+  $_serverSocket activate [::itcl::code $this authenticate]
+  Trace::EXE end
+}
+
+
+#--------------------------------------------------------------------
+# PROTECTED METHOD authenticate
+#
+# Description:
+#   Authenticate login requests coming from the login client.
+# 
+# Input Parameters:
+#   data_: protocol message with login information
+#   sd_: client's socket descriptor
+#
+# Return Values:
+#   None
+#--------------------------------------------------------------------
+::itcl::body LoginMgr::authenticate {data_ sd_} {
+  Trace::EXE begin
+  set request [lindex $data_ 0]
+  if {$request == "login" && [llength $data_] == 3} {
+    set username [lindex $data_ 1]
+    set password [lindex $data_ 2]
+    if {[info exists _validIds($username)]} {
+      if {$_validIds($username) == $password} {
+        $_serverSocket write $sd_ "access granted"
+      } else {
+        $_serverSocket write $sd_ "access denied - bad password"
+      }
+    } else {
+      $_serverSocket write $sd_ "access denied - bad username"
+    }
+  } else {
+    Trace::ERR "BAD DATA: $data_"
+  }
+  Trace::EXE end
+}
+

@@ -1,0 +1,16 @@
+# Create the disjointlistbox with the buttons between the two
+# scrolledlistboxes.
+iwidgets::disjointlistbox .dl -buttonplacement center \
+  -borderwidth 2 -textbackground ghostwhite \
+  -lhslabeltext "Available disjointlistbox options:" \
+  -rhslabeltext "Current selected options:"
+pack .dl -fill both -expand 1
+wm geometry . 475x225
+
+# Move the labels to the northwest corner of the scrolledlistboxes.
+.dl component lhs configure -labelpos nw
+.dl component rhs configure -labelpos nw
+
+# Add some data to the left hand side and select the 5th item.
+.dl insertlhs [.dl configure]
+.dl lhs selection set 4 4

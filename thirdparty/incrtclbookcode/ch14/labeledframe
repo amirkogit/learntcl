@@ -1,0 +1,22 @@
+# NOTE: It is not generally recommended to use the labeledframe
+# as a general-purpose [incr Widget]. It is intended to be used
+# as a base class for other [incr Widgets].
+
+# Create the labeledframe.
+iwidgets::labeledframe .lf -labelpos nw \
+  -labeltext "\[incr Man\] by Michael Plaugher"
+pack .lf -fill both -expand 1
+wm geometry . 250x200
+
+# Get the childsite and modify it so contained widgets will be
+# visible.
+set cs [.lf childsite]
+$cs configure -background white
+grid rowconfigure $cs 0 -weight 1
+grid columnconfigure $cs 0 -weight 0
+
+# Add a label in the childsite with the [incr Man] image. Note
+# that this pathname will likely not exist on your system. You can
+# get the [incr Man] image from www.tcltk.com/itcl/heroes.htm
+label $cs.img -image [image create photo -file /tmp/iman2.gif] -bd 0
+pack $cs.img -pady 14

@@ -1,0 +1,17 @@
+# Create the promptdialog.
+iwidgets::promptdialog .pd -modality application \
+  -labeltext "Enter username:" -labelpos w \
+  -textfont 9x15bold -title "Login Prompt" \
+  -labelfont 9x15bold
+
+# Don't need the 'Apply' button.
+.pd hide Apply
+.pd buttonconfigure Cancel -text "I forgot it"
+
+# Give focus to the input area.
+focus [.pd component prompt component entry]
+
+# Center the promptdialog and then display it.
+.pd center
+update idletasks
+.pd activate

@@ -1,0 +1,11 @@
+# Create the calendar
+iwidgets::calendar .c -days "Sun Mon Tue Wed Thu Fri Sat" \
+  -weekdaybackground grey68 -weekendbackground grey54 \
+  -outline black -width 250 -height 200 -buttonforeground black
+pack .c
+
+# Show January 2000
+.c show "3 months"; # If the current month is October 1999.
+
+# Select a particular day on the calendar
+.c select 1/2/00; # Note that 00 is interpreted as 2000.

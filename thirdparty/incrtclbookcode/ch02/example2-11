@@ -1,0 +1,13 @@
+::itcl::class Parent {
+  # Class Methods
+  protected method baseMethod {} {print "A virtual example."}
+  protected method print {string_} {puts "Parent::print - $string_"}
+}
+
+::itcl::class Child {
+  inherit Parent
+
+  # Class Methods
+  public method go {} {baseMethod}
+  private method print {string_} {puts "Child::print - $string_"}
+}

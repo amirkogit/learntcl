@@ -1,0 +1,14 @@
+# Create the spinint.
+iwidgets::spinint .sp -labeltext "Enter desired volume: " \
+  -width 5 -range "-10 100"
+pack .sp -pady 12 -padx 12
+wm title . spinint
+
+# This is a trick you can use to specify units next to a spinner.
+set lcs [winfo parent [.sp childsite]]
+label $lcs.db -text dB
+grid $lcs.db -row 0 -column 2
+
+# Clear the entry and start at 28dB.
+.sp clear
+.sp insert 0 28

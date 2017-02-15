@@ -1,0 +1,47 @@
+# Create the mainwindow.
+iwidgets::mainwindow .mw -menubarfont {{MS Sans Serif} 10} \
+  -title "You can create a skeleton interface for a text editor\
+  with less than 30 lines of code!"
+
+# This directory may not exist on your system.
+set dir ${iwidgets::library}/demos/images
+
+# Add some menu selections.
+.mw menubar add menubutton file -text File -underline 0
+.mw menubar add menubutton edit -text Edit -underline 0
+.mw menubar add menubutton format -text Format -underline 2
+.mw menubar add menubutton tools -text Tools -underline 0
+.mw menubar add menubutton help -text Help -underline 0
+
+# Add some toolbar items. (The 107 pixel width for the spacer1
+# frame is the width of images used for the mousebar buttons plus
+# some padding for the borderwidth.)
+.mw toolbar add frame spacer1 -width 107 -relief raised -bd 2
+.mw toolbar add button open -balloonstr "Open File" \
+  -image [image create photo -file $dir/open.gif]
+.mw toolbar add button close -balloonstr "Close File" \
+  -image [image create photo -file $dir/close.gif]
+.mw toolbar add frame spacer2 -width 16 -relief raised -bd 2
+.mw toolbar add button cut -balloonstr "Cut Selection" \
+  -image [image create photo -file $dir/cut.gif]
+.mw toolbar add button paste -balloonstr "Paste Selection" \
+  -image [image create photo -file $dir/paste.gif]
+
+# Add some mousebar buttons.
+.mw mousebar add button save -balloonstr "Save File" \
+  -image [image create photo -file $dir/save.gif]
+.mw mousebar add button print -balloonstr "Print File" \
+  -image [image create photo -file $dir/print.gif]
+.mw mousebar add button exit -balloonstr "Close File and Exit" \
+  -image [image create photo -file $dir/exit.gif]
+
+# Create a scrolledtext [incr Widget] and import the source code
+# for the mainwindow.
+set st [::iwidgets::scrolledtext [.mw childsite].st]
+$st import $dir/../../scripts/mainwindow.itk
+pack $st -fill both -expand 1
+
+# Display the mainwindow in the middle of the screen after it's done
+# building its components.
+.mw center
+after idle ".mw activate"

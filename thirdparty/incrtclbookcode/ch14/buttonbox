@@ -1,0 +1,14 @@
+# Create the buttonbox.
+iwidgets::buttonbox .bb -padx 8 -pady 8
+
+# Add 5 pushbuttons.
+.bb add prev -text "<< Prev"
+.bb add apply -text Apply
+.bb add clear -text Clear
+.bb add close -text Close
+.bb add next -text "Next >>"
+
+# Make the Close pushbutton the default.
+.bb default close
+
+pack .bb -fill both -expand 1

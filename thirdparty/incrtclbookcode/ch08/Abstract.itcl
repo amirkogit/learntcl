@@ -1,0 +1,16 @@
+::itcl::class Abstract {
+  constructor {} {
+    # Don't let the user create instances of Abstract.
+    if {[namespace tail [$this info class]] == "Abstract"} {
+      error "Can't instantiate an abstract base class!"
+    }
+
+    # Make sure the derived class has implemented the pv (pure
+    # virtual) method. 
+    if {![string length [$this info function pv -body]]} {
+      error "You must define method pv in order to\
+        inherit from Abstract!"
+    }
+  }
+  protected method pv {} {}
+}

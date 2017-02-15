@@ -1,0 +1,25 @@
+::itcl::class TickerTape {
+  # Class constructor/destructor
+  constructor {msg_} {
+    set _canvas [canvas .c -bg grey40 -relief ridge -bd 4 \
+      -width 400 -height 30] 
+    $_canvas create text [expr [winfo reqwidth .c] + \
+      [expr [winfo reqwidth [label ._tmp_ -text $msg_]] / 2]] 20 \
+      -text $msg_ -tag $_tag -fill green
+    destroy ._tmp_
+    pack $_canvas
+  }
+
+  # Class Methods
+  public method scroll {} {
+    $_canvas move $_tag -1 0
+    if {[lindex [$_canvas bbox $_tag] 2] < 0} { 
+      return
+    }
+    after 5 "$this scroll"
+  }
+
+  # Class Data Members
+  private variable _canvas 
+  private variable _tag txt
+}

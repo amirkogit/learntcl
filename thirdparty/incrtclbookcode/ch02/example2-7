@@ -1,0 +1,35 @@
+::itcl::class Example {
+  # Constructor
+  constructor {blit_} {
+    # Get a reference to blit_
+    upvar $blit_ reference
+
+    # Make sure the argument is a variable.
+    if {![info exists reference]} {
+      return -code error "Variable $blit_ doesn't exist!"
+    }
+
+    # Make sure the value is an integer.
+    if {![regexp {^[1-9]*[0-9]$} $reference]} {
+      return -code error "Usage: Example objName \#"
+    }
+
+    # Increment the argument.
+    puts "$blit_: $reference"
+    incr reference 10
+
+    # The argument is modified!
+    puts "$blit_ after \"incr 10\": $reference"
+
+    # Modify it further.
+    decr $blit_
+    puts "$blit_ after decr:    $reference"
+  }
+
+  # Class Methods
+  private method decr {val_} {
+    upvar 2 $val_ num
+    incr num -1
+  }
+}
+

@@ -1,0 +1,5 @@
+wm title . pushbutton
+# Create the pushbutton.
+iwidgets::pushbutton .pb -text "A Default Button" \
+  -defaultring 1 -padx 15 -pady 6
+pack .pb -padx 8 -pady 6

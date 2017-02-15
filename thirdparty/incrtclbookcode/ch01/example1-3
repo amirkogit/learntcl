@@ -1,0 +1,32 @@
+::itcl::class DialogWindow {
+  # Class constructor and destructor
+  constructor {message_} {
+    set _toplevelWindow [toplevel .top]
+    wm withdraw $_toplevelWindow
+    set _bitmap [label $_toplevelWindow.bmap -bitmap info -fg blue]
+    set _textMessage [label $_toplevelWindow.txt -text $message_]
+    set _separator [frame $_toplevelWindow.sep -height 4 -bd 2 -relief sunken]
+    set _okButton [button $_toplevelWindow.ok -text OK]
+  }
+  destructor {
+    destroy $_toplevelWindow 
+  }
+
+  # Class Methods
+  method draw {} {
+    grid $_bitmap -padx 16 -sticky w
+    grid $_textMessage -sticky w -row 0 -column 1
+    grid $_separator -sticky ew -columnspan 2 -pady 12
+    grid $_okButton -columnspan 2 -ipadx 8 -pady 4
+    grid columnconfigure $_toplevelWindow 0 -weight 1
+    grid columnconfigure $_toplevelWindow 1 -weight 1
+    wm deiconify $_toplevelWindow
+  }
+
+  # Class Data Members
+  variable _toplevelWindow
+  variable _bitmap
+  variable _textMessage
+  variable _separator
+  variable _okButton
+}

@@ -1,0 +1,24 @@
+::itcl::class IdleWatcher {
+  # Class constructor/destructor
+  constructor {idleTime_} {
+    # Create a timer and start it.
+    set _timer [Timer t $idleTime_ [itcl::code $this shutdown]]
+    $_timer start
+
+    # Set up watchdog mechanisms.
+    foreach mouseButton {1 2 3} {
+      bind . <$mouseButton> [itcl::code $_timer reset]
+      bind . <B$mouseButton-Motion> [itcl::code $_timer reset]
+      bind . <ButtonRelease-$mouseButton> [itcl::code $_timer reset]
+    }
+    foreach event {KeyPress Enter Leave} {
+      bind . <$event> [itcl::code $_timer reset]
+    }
+  }
+
+  # Class Methods
+  private method shutdown {} {
+    puts "IDLE TIME EXCEEDED.  APPLICATION SHUT DOWN!"
+    # Exit the program here, display a dialog window, etc.
+  }
+}

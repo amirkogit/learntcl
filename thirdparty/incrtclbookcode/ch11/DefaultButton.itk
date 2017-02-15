@@ -1,0 +1,36 @@
+::itcl::class DefaultButton {
+  inherit ::itk::Widget
+
+  constructor {args} {}
+
+  public  method invoke {} {flash; $itk_component(button) invoke}
+
+  private method flash  {} {$itk_component(button) flash}
+}
+
+
+::itcl::body DefaultButton::constructor {args} {
+  # Create the default ring around the button.
+
+  itk_component add ring {
+    frame $itk_interior.ring -relief sunken -bd 2
+  }
+
+  # Create the button inside the ring.
+  itk_component add button {
+    button $itk_component(ring).b
+  } {
+    # Add these options to the composite options list.
+    keep -text -command
+  }
+
+  pack $itk_component(button) -ipadx 4 -ipady 2 -padx 4 -pady 3
+  pack $itk_component(ring)
+
+  # Invoke the button when the return key is pressed.
+  bind [winfo toplevel $itk_interior] <Return> \
+    "$itk_component(button) flash; $itk_component(button) invoke"
+
+  # Always call itk_initialize after component widgets are added.
+  eval itk_initialize $args
+}

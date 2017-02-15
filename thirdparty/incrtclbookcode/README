@@ -1,0 +1,46 @@
+This directory tree includes all major (no 1- or 2-liners) code examples from
+the book.  Even though I've checked the code multiple times, slight
+discrepancies between the code and the book may exist in some of the examples.
+This may have happened in later stages of editing/proofing.  There, that's my
+disclaimer.  ;-)
+
+Much of the code is provided to show you how to implement certain tasks and
+is not necessarily intended to be used as production code.  Before you
+cut-and-paste code into your own applications, make sure to verify that it
+will work for you in your particular app.  Many of the examples can be made
+much more robust but have been intentionally written as is for simplicity's
+sake.
+
+I think you'll find many of the examples very useful.  In particular,
+check out the tracing example in Chapter 7 (it's also in Chapter 5, but I
+hadn't introduced composition at that point) as well as the dynamic
+debugging example in Chapter 5.  Also, if you're interested in client/server
+stuff, you may find the example in Chapter 6 handy and the chat room example
+in Chapter 7.  Most of the other examples in the book are smaller scale
+than these.
+
+To try any of the [incr Widgets], change directories to ch14 and type
+the following in a wish shell:
+
+	% package require Iwidgets
+	3.1.0
+	% source XXX
+
+where XXX is the name of the file.  The creation, initialization, packing,
+and drawing is done for you in the file.  You should see a window just like
+what is shown in the book.
+
+All code except what's provided in Chapter 9 (C/C++ stuff) has been tested
+on both Unix and Windows 95.  I wrote and tested Chapter 9's examples on
+Unix only (Solaris 2.6).  Be aware that some of the [incr Widget] examples
+have Windows-specific pathnames.  I've made the appropriate comments regarding
+this where applicable.
+
+If you have any questions or comments, feel free to contact me at either of
+the two following addresses:
+
+	csmith@adc.com
+	itclguy@yahoo.com
+
+Happy itcl-ing!
+-chad

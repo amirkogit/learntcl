@@ -1,0 +1,25 @@
+::itcl::class TraceTest {
+    constructor {} { 
+      ::Trace::EXE begin
+      method1
+      method2
+      ::Trace::COMM "Wow, this is easy!"
+      method3
+      ::Trace::EXE end
+    }
+    public method method1 {} {
+      ::Trace::EXE begin
+      ::Trace::ERR "This is an example of an error message."
+      method3
+      ::Trace::EXE end
+    }
+    private method method2 {} {
+      ::Trace::EXE begin
+      ::Trace::EXE end
+    }
+    private method method3 {} {
+      ::Trace::EXE begin
+      ::Trace::WARN "This is a warning message."
+      ::Trace::EXE end
+    }
+  }

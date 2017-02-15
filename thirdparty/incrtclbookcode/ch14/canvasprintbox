@@ -1,0 +1,13 @@
+# Create the canvasprintbox.
+iwidgets::canvasprintbox .cp -stretch 1
+pack .cp
+
+# Create a calendar.
+iwidgets::calendar .cal -outline black
+pack .cal
+
+# Import the calendar into the canvasprintbox for printing later.
+# Note that the text will not appear in the stamp.
+update
+.cp setcanvas [.cal component page]
+pack forget .cal

@@ -1,0 +1,20 @@
+::itcl::class Backdoor {
+  # Class constructor/destructor
+  constructor {port_ {host_ localhost}} {}
+  destructor {catch {close $_socket}}
+
+  # Class Methods
+  public method write {msg_} {puts $_socket $msg_}
+
+  # Class Data Members
+  private variable _socket
+}
+
+::itcl::body Backdoor::constructor {port_ {host_ localhost}} {
+  # Connect with the server.
+  if {catch {socket $host_ $port_} _socket} {
+    puts "Unable to connect with server."
+    return -code error
+  }
+  fconfigure $_socket -buffering line
+}

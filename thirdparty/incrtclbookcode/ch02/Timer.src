@@ -1,0 +1,28 @@
+::itcl::body Timer::start {{when_ 0}} {
+  if {$_elapsedTime > $_upperLimit} {
+    puts "Please reset the timer before restarting."
+    return
+  }
+  if {$when_} {
+    puts "Waiting $when_ seconds before starting..."
+  }
+  set _afterId [after [expr 1000 * $when_] [::itcl::code $this count]]
+}
+
+::itcl::body Timer::stop {} {
+  puts "Stopping timer!"
+  after cancel $_afterId
+}
+
+::itcl::body Timer::count {} {
+  if {$_elapsedTime == $_upperLimit} {
+    incr _elapsedTime
+    puts "Done!"
+    eval $_action
+  } else {
+    incr _elapsedTime
+    puts "  $_elapsedTime"
+    set _afterId [after 1000 [::itcl::code $this count]]
+  }
+}
+

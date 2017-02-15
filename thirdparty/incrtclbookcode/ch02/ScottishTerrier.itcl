@@ -1,0 +1,17 @@
+::itcl::class ScottishTerrier  {
+  inherit Dog
+
+  # Class Methods
+  public method speak {} {
+    bark
+  }
+  public method doTricks {} {
+    sit
+    rollover
+    feedme
+  }
+  private method feedme {} {
+    puts -nonewline "OK, where's my treat?  "
+    bark
+  }
+}

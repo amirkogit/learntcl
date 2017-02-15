@@ -1,0 +1,10 @@
+# Create the spindate.
+iwidgets::spindate .spd -monthformat brief
+
+# Show an explicit date.
+.spd show 9/1/96
+
+# Display the spindate.
+wm geometry . 150x150
+pack .spd -expand 1
+grid [.spd component day] -pady 6; # -datemargin not working

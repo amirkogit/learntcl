@@ -1,0 +1,39 @@
+# Define a default root directory. Note that this path may not exist
+# on your system.
+set root "C:/Program Files/Tcl/lib"
+cd $root
+wm withdraw .
+
+proc ls {dir_} {
+  global root
+  if {$dir_ == ""} {
+    set dir $root
+  } else {
+    set dir $dir_
+  }
+  if {![file isdirectory $dir]} {
+    return
+  }
+  cd $dir
+  set returnList ""
+  foreach file [lsort [glob -nocomplain *]] {
+    lappend returnList [list [file join $dir $file] $file]
+  }
+  return $returnList
+}
+
+# Create the hierarchy.
+iwidgets::hierarchy .h -querycommand {ls %n} -visibleitems 45x20 \
+  -labeltext $root -labelpos nw
+pack .h -fill both -expand 1
+
+# Expand a couple of directories.
+update idletasks
+.h expand $root/iwidgets3.0
+.h expand $root/iwidgets3.0/demos
+
+# Highlight the topmost expanded directory.
+.h selection add $root/iwidgets3.0 
+
+# After everything's done, display the hierarchy.
+after idle {wm deiconify .}

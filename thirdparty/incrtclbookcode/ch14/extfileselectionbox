@@ -1,0 +1,4 @@
+# Create the extfileselectionbox.
+iwidgets::extfileselectionbox .efsb -mask "*box.itk" \
+  -directory ${iwidgets::library}/scripts
+pack .efsb -fill both -expand 1

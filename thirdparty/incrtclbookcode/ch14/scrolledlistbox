@@ -1,0 +1,17 @@
+# Create the scrolledlistbox.
+iwidgets::scrolledlistbox .sl -textbackground ghostwhite \
+  -labelpos nw -labeltext Composers: -selectmode extended \
+  -labelfont -Adobe-Helvetica-Bold-R-Normal--*-140-*-*-*-*-*-* \
+  -selectforeground blue -selectbackground grey70
+pack .sl -fill both -expand 1
+
+wm title . scrolledlistbox
+wm geometry . 160x185
+
+# Insert items into the listbox. Note that the -items option from
+# iwidgets2.2 is no longer a valid option.
+.sl insert 0 Bach Mozart Beethoven Chopin Liszt Brahms \
+  Tchaikovsky Rachmaninoff Debussy Stravinsky Rodriguez Johnson
+
+# Select some items.
+.sl selection set 1; .sl selection set 3; .sl selection set 8

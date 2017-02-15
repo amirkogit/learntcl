@@ -1,0 +1,9 @@
+# Create the spintime.
+iwidgets::spintime .st -timemargin 6
+
+# Show the current time.
+.st show
+
+wm title . spintime
+wm geometry . 175x95
+pack .st -expand 1

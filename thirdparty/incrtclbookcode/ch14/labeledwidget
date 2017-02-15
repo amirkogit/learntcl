@@ -1,0 +1,19 @@
+# Set the window size.
+wm geometry . 285x195
+
+# Create the labeledwidget.
+iwidgets::labeledwidget .lw -labelpos n \
+  -labeltext "Pack other widgets into a labeledwidget" \
+  -labelfont -Adobe-Helvetica-Bold-R-Normal--*-140-*-*-*-*-*-*
+pack .lw -fill both -expand 1
+
+# Get the childsite and pack some example widgets into it.
+set cs [.lw childsite]
+$cs configure -relief ridge -bd 3
+pack [label $cs.txt -text "You can pack any kind of Tk widget or\
+  \[incr Widget\] into the childsite, such as" -wraplength 200\
+  -justify left] -pady 8
+pack [iwidgets::pushbutton $cs.pb -text "a pushbutton" \
+  -defaultring 1] -pady 8
+pack [entry $cs.e -background ghostwhite -width 25] -pady 8
+$cs.e insert 0 "or a simple Tk entry widget"

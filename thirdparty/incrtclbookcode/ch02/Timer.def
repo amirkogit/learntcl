@@ -1,0 +1,27 @@
+::itcl::class Timer {
+  # Class constructor
+  constructor {upperLimit_ {action_ beep}} {
+    set _upperLimit $upperLimit_
+    if {$action_ == "beep"} {
+      set _action bell
+    } else {
+      set _action $action_
+    }
+  }
+
+  # Accessor Methods
+  public method elapsedTime {} {return $_elapsedTime}
+  public method changeAction {newAction_} {set _action $newAction_}
+  public method reset {} {set _elapsedTime 0}
+
+  # Class Methods
+  public method start {{when_ 0}}
+  public method stop {}
+  private method count {}
+
+  # Class Data Members
+  private variable _upperLimit
+  private variable _action
+  private variable _elapsedTime 0
+  private variable _afterId
+}

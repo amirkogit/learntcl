@@ -1,0 +1,11 @@
+wm title . regexpfield
+
+# Create the regexpfield.
+iwidgets::regexpfield .rf -labeltext "Enter text string:" \
+  -fixed 14
+
+# Set up a simple regular expression to control user input. The 
+# user must input an alpha character first, and if a numeric
+# character is entered, no other characters are allowed.
+.rf configure -regexp {^[a-zA-Z]+[0-9]?$}
+pack .rf

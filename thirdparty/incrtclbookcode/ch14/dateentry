@@ -1,0 +1,9 @@
+# Create the dateentry.
+iwidgets::dateentry .de -labeltext "Selected date:" \
+  -outline black -weekendbackground grey60 \
+  -weekdaybackground ghostwhite
+pack .de
+
+# Specify a particular date. Then you can manually click on the icon
+# button to display the calendar as shown.
+.de show 1/2/00

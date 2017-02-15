@@ -1,0 +1,41 @@
+namespace eval Radiobox {
+  package require Itcl
+
+  variable value
+  variable numButtons 0
+  variable container
+  variable separator
+
+  proc selected {} {
+    variable value
+    return $value
+  }
+
+  proc add {text_} {
+    variable value
+    variable numButtons
+    variable container
+    variable separator
+
+    incr numButtons
+    pack [radiobutton $container.r$numButtons -text $text_ \
+      -variable [itcl::scope value] -value $numButtons] \
+      -before $separator
+  }
+
+  proc create {container_} {
+    variable container
+    variable separator
+
+    set container $container_
+    set outer [frame $container.rboxFrame]
+    set separator \
+      [frame $container.sep -height 4 -bd 2 -relief sunken]
+    set ok [button $container.ok -text OK -width 8]
+    set cancel [button $container.cancel -text Cancel -width 8]
+    set space [frame $container.padding -height 10]
+    pack $separator -fill x -pady 12
+    pack $space -side bottom
+    pack $ok $cancel -side left -expand 1 -ipadx 4 -ipady 4 -padx 12
+  }
+}

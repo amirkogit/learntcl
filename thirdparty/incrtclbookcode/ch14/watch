@@ -1,0 +1,4 @@
+wm title . watch
+iwidgets::watch .ironman -labelfont 6x10 -hourradius .6
+.ironman show 09:06:34
+pack .ironman

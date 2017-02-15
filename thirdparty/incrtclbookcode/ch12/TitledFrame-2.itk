@@ -1,0 +1,55 @@
+::itcl::class TitledFrame {
+  inherit ::itk::Widget
+
+  constructor {args} {}
+
+  # Configuration Options
+  itk_option define -state state State normal
+
+  public method options {} {
+    foreach option [configure] {
+      puts "option: [lindex [lindex $option 0] 0]"
+    }
+  }
+  public method remove {which_} {
+    itk_component delete $which_
+  }
+}
+
+
+::itcl::configbody TitledFrame::state {
+  switch -- $itk_option(-state) {
+    "normal" {
+      $itk_component(title) configure -foreground black
+      configure -cursor top_left_arrow
+    }
+    "disabled" {
+      $itk_component(title) configure -foreground grey50
+      configure -cursor X_cursor
+    }
+    default {
+      error "Bad option: $itk_option(-state). Should be \"normal\"\
+        or \"disabled.\"."
+    }
+  }
+}
+
+
+::itcl::body TitledFrame::constructor {args} {
+  itk_component add title {
+    label $itk_interior.title
+  } {
+    keep -text
+  }
+
+  itk_component add frame {
+    frame $itk_interior.f
+  } {
+    keep -relief -borderwidth
+  }
+
+  pack $itk_component(title) -anchor w
+  pack $itk_component(frame) -fill both -expand 1
+  eval itk_initialize $args
+}
+

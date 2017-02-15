@@ -1,0 +1,47 @@
+# Create the menubar and add a few menubuttons and menus with the
+# -menubuttons configuration options. Note that this example is
+# more of a guideline on how to create menus and different kinds
+# of menu entries than something that's meant to be functional.
+# It's intentionally lacking in consistency and functionality.
+iwidgets::menubar .mb -activebackground grey40 \
+  -activeforeground white \
+  -helpvariable globalHelpVar -menubuttons {
+    menubutton file -text File -underline 0 -menu {
+      command save -label Save -underline 0
+      command quit -label Exit -underline 1
+    }
+    menubutton top -text Topology -underline 0 -menu {
+      cascade net -label Network -underline 0 -menu {
+        command add -label "Add Node" -underline 0
+        command rem -label "Remove Node" -underline 0
+      }
+      command status -label Status -underline 0
+    }
+    menubutton alarms -text Alarms -underline 0 -menu {
+      command filter -label Filter -underline 0
+      cascade display -label Display -underline 0 -menu {
+        radiobutton curr -label Active -underline 0 \
+          -helpstr "Display all active alarms for selected node."
+        radiobutton hist -label Historical -selectcolor yellow \
+          -activeforeground yellow -underline 0 \
+          -helpstr "Display last 100 alarms for selected node."
+      }
+    }
+  }
+
+# Now add a help menubutton with the add method. Notice that a help
+# menubutton is automatically packed on the right side.
+.mb add menubutton help -text Help -underline 0
+
+# Create a scrolledcanvas area in which a network topology could
+# be drawn and managed with the menubar (quite simplified).
+iwidgets::scrolledcanvas .sc -width 275 -height 185 \
+  -hscrollmode dynamic -vscrollmode dynamic -textbackground ghostwhite
+
+# Create a help status area.
+label .help -relief sunken -bd 2 -bg grey40 -fg white \
+  -textvariable globalHelpVar
+
+pack .mb -fill x -expand 1
+pack .sc -fill both -expand 1
+pack .help -fill x -expand 1

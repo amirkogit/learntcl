@@ -1,0 +1,15 @@
+# Create the combobox.
+iwidgets::combobox .cb -labeltext "Selected Item:"
+pack .cb
+
+# Insert some data into the scrolledlistbox.
+for {set i 1} {$i <= 25} {incr i} {
+  .cb insert list end "entry number $i"
+}
+
+# Select the third entry.
+.cb selection set 2
+
+# Display the dropdown scrolledlistbox.
+update
+.cb invoke

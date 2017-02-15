@@ -1,0 +1,61 @@
+::itcl::class DragAndDrop {
+  # Class constructor/destructor
+  constructor {} {
+    # Create and hide a new toplevel window.
+    set _window [toplevel .[namespace tail $this]]
+    wm withdraw $_window
+
+    # Create and pack internal tk components.
+    set _canvas [canvas $_window.c -bg grey -relief groove -bd 4]
+    set b [button $_window.b -text Close \
+      -command "::itcl::delete object $this"]
+    pack $_canvas -fill both -expand 1
+    pack $b -ipadx 8 -ipady 4 -pady 8
+
+    # Create canvas image.
+    set itclman [label $_canvas.image -image [image create photo \
+      -file /homes/csmith/images/iman2.gif]]
+    $_canvas create window 100 100 -window $itclman -tags $_tag
+
+    # Set up internal bindings on canvas tag.
+    bind $itclman <1> [namespace code "$this mark %X %Y"]
+    bind $itclman <B1-Motion> [namespace code "$this drag %X %Y"]
+  }
+  destructor {
+    destroy $_window
+  }
+
+  # Class Methods
+  public method draw {} {wm deiconify $_window}
+  private {
+    method mark {oldx_ oldy_}
+    method drag {currentx_ currenty_}
+  }
+
+  # Class Data Members
+  private {
+    variable _oldx
+    variable _oldy
+    variable _tag shape
+    variable _window
+    variable _canvas
+  }
+}
+
+::itcl::body DragAndDrop::mark {newx_ newy_} {
+  set _oldx $newx_
+  set _oldy $newy_ 
+}
+
+::itcl::body DragAndDrop::drag {currentx_ currenty_} {
+  set bbox [$_canvas bbox $_tag]
+  set upperleft [lindex $bbox 0]
+  set upperright [lindex $bbox 1]
+  if {!($upperleft) || !($upperright)} {
+    return
+  }
+  set x [expr $currentx_ - $_oldx]
+  set y [expr $currenty_ - $_oldy] 
+  $_canvas move $_tag $x $y
+  mark $currentx_ $currenty_
+}

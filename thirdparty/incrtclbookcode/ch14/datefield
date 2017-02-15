@@ -1,0 +1,6 @@
+# Create the datefield.
+iwidgets::datefield .df -labeltext "Current selected date:"
+pack .df -padx 8 -pady 6
+
+# Show the date 1 week from now.
+.df show "1 week"

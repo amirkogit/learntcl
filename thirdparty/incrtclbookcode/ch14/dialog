@@ -1,0 +1,19 @@
+# Create the dialog.
+iwidgets::dialog .d -title "Message Dialog Box"
+
+# Hide the Help button.
+.d hide Help
+
+# Add an info bitmap and a message in the childsite frame.
+set cs [.d childsite]
+label $cs.info -bitmap info -foreground blue
+message $cs.msg -justify left -width 300 -text "This is an\
+  example of the dialog \[incr Widget\] with a bitmap and\
+  some text added in the childsite."
+pack $cs.info -padx 8 -side left
+pack $cs.msg -pady 12 -side left
+
+# Tell the dialog to draw itself in the middle of the screen.
+.d center
+update idletasks
+after idle ".d activate"

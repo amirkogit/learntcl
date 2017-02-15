@@ -1,0 +1,20 @@
+# Create some entryfields.
+set primary [iwidgets::entryfield .pri \
+  -labeltext "Primary instrument:" -validate alphabetic]
+set priyears [iwidgets::entryfield .priyrs -validate numeric \
+  -labeltext "Years played:"]
+set secondary [iwidgets::entryfield .sec \
+  -labeltext "Secondary instrument:" -validate alphabetic]
+set secyears [iwidgets::entryfield .secyrs -validate numeric \
+  -labeltext "Years played:"]
+pack $primary $priyears $secondary $secyears -pady 4 -padx 2
+
+# Line up the entryfields with this handy base class procedure.
+iwidgets::Labeledwidget::alignlabels \
+  $primary $priyears $secondary $secyears
+
+# Add some data.
+$primary insert 0 clarinet
+$priyears insert 0 16
+$secondary insert 0 sax
+$secyears insert 0 10

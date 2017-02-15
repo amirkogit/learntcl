@@ -1,0 +1,36 @@
+::itcl::class LabeledEntry {
+  inherit ::itk::Widget
+
+  constructor {args} {}
+  private method printCurrentOptions {}
+}
+
+
+::itcl::body LabeledEntry::constructor {args} {
+  puts "Configuration options before adding any component widgets:"
+  printCurrentOptions
+
+  itk_component add label {
+    label $itk_interior.l
+  } 
+  puts "Configuration options after adding the label widget:"
+  printCurrentOptions
+
+  itk_component add entry {
+    entry $itk_interior.e
+  }
+  puts "Configuration options after adding the entry widget:"
+  printCurrentOptions
+
+  eval itk_initialize $args
+}
+
+
+::itcl::body LabeledEntry::printCurrentOptions {} {
+  set count 1
+  foreach option [configure] {
+    puts "  $count) [lindex $option 0]"
+    incr count
+  }
+  puts ""
+}

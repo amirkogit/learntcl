@@ -1,0 +1,16 @@
+wm title . radiobox
+wm geometry . 165x140
+
+# Create the radiobox.
+iwidgets::radiobox .rb -labeltext "Access Level" 
+
+# Add some radiobuttons
+.rb add super -text "Super user"
+.rb add three -text "Level 3"
+.rb add two -text "Level 2"
+.rb add one -text "Level 1"
+.rb add ro -text "Read-only user"
+
+# Select the second to lowest level.
+.rb select one
+pack .rb -fill both

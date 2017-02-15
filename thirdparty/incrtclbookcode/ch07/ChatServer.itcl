@@ -1,0 +1,195 @@
+::itcl::class ChatServer {
+  # Class constructor/destructor
+  constructor {{port_ 21112}} {}
+  destructor {catch {::itcl::delete object $_socket}}
+
+  # Class Methods
+  private method filter {msg_}
+  private method processClientInput {data_ sd_}
+  private method serverMessage {msg_ sd_}
+
+  # Class Data Members
+  private variable _serverSocket   ; # ServerSocket object
+  private variable _currentChatters; # array of active chat rooms
+  private variable _whispering     ; # array of whispering chatters
+  private variable _maxMsgLen 70   ; # maximum message length
+  private variable _reasonDenied ""; # reason for denial to post
+}
+
+
+#--------------------------------------------------------------------
+# CONSTRUCTOR
+#
+# Description:
+#   Create the ServerSocket object and activate it.  Chat room
+#   clients may connect to the server on the port specified by the
+#   port_ parameter.
+#
+# Input Parameters:
+#   port_: port number to which clients should connect - default
+#          value is 21112
+#
+# Return Values:
+#   TCL_OK or TCL_ERROR
+#--------------------------------------------------------------------
+::itcl::body ChatServer::constructor {{port_ 21112}} {
+  # Create the ServerSocket object. This is an example of composition.
+  if {[catch {ServerSocket #auto $port_} _serverSocket]} {
+    error $_serverSocket
+  }
+  $_serverSocket activate [::itcl::code $this processClientInput]
+}
+
+
+#--------------------------------------------------------------------
+# PRIVATE METHOD filter
+#
+# Description:
+#   Filters messages posted to the chat room before they're broadcast
+#   to all chat room users.  Currently, it only checks for message
+#   length.  You can add additional filtering as necessary.  This
+#   method is invoked by the processClientInput method.
+#
+# Input Parameters:
+#   msg_: message to be filtered
+#
+# Return Values:
+#   0 if filtering fails, 1 if successful
+#--------------------------------------------------------------------
+::itcl::body ChatServer::filter {msg_} {
+  set len [string length $msg_]
+  if {$len > $_maxMsgLen} {
+    set _reasonDenied "Message too long ($len chars). Maximum\
+      message length is $_maxMsgLen characters."
+    return 0
+  }
+
+  # Add optional additional filtering here.
+  return 1
+}
+
+
+#--------------------------------------------------------------------
+# PRIVATE METHOD processClientInput
+#
+# Description:
+#   This method is registered with the ServerSocket object to be
+#   invoked by that object when the server's socket connection
+#   becomes readable.  Its purpose is to process client requests.
+#
+# Input Parameters:
+#   data_: the client request as read from the socket
+#   sd_: the client's socket descriptor
+#
+# Return Values:
+#   None
+#--------------------------------------------------------------------
+::itcl::body ChatServer::processClientInput {data_ sd_} {
+  set protocolString [lindex $data_ 0]
+  switch -- $protocolString {
+    "new chatter" {
+      # A new chat room session has started and is requesting a list
+      # of current chatters. Return the list and tell all the other
+      # ChatRoomUser objects that a new chatter has entered the room.
+      if {[array exists _currentChatters]} {
+        foreach sd [array names _currentChatters] {
+          lappend names $_currentChatters($sd)
+        }
+        $_serverSocket write $sd_ [list "current chatters" $names]
+      }
+      set _currentChatters($sd_) [lindex $data_ end]
+      $_serverSocket broadcast \
+        [list "new chatter" $_currentChatters($sd_)]
+    }
+
+    "whisper on" {
+      # A user is requesting a private chat session with another
+      # user. Save the requestor's socket descriptor, and notify
+      # the other user of the chat request.
+      set _whispering($sd_) [lindex $data_ end]
+      foreach sd [array names _currentChatters] {
+        if {$_currentChatters($sd) == [lindex $data_ end]} {
+          serverMessage "$_currentChatters($sd_) WANTS TO \
+            WHISPER SOMETHING TO YOU" $sd
+        }
+      }
+    }
+
+    "whisper off" {
+      # A user has terminated the private chat session. Unset the
+      # corresponding index in the array and notify the other user
+      # of the chat termination.
+      unset _whispering($sd_)
+      foreach sd [array names _currentChatters] {
+        if {$_currentChatters($sd) == [lindex $data_ end]} {
+          serverMessage "$_currentChatters($sd_) HAS \
+            STOPPED WHISPERING" $sd
+        }
+      }
+    }
+
+    "disconnectingSocket" {
+      # The physical socket connection has been corrupted or
+      # closed. Broadcast this information to all other chatters.
+      $_serverSocket broadcast \
+        [list "server: remove" $_currentChatters($sd_)]
+      catch {unset _currentChatters($sd_)}
+      if {[array names _currentChatters] == ""} {
+        unset _currentChatters
+      }
+    }
+
+    default {
+      # A user is requesting to post a new message to the chat room.
+      # Filter it. If filtering fails, then only post the message if
+      # the user is in a private chat session. If filtering succeeds,
+      # post accordingly.
+      if {![filter $data_]} {
+        if {![info exists _whispering($sd_)]} {
+          serverMessage \
+            "The server refuses to post this message!" $sd_
+          return
+        }
+      }
+      if {[info exists _whispering($sd_)]} {
+        foreach sd [array names _currentChatters] {
+          if {$_currentChatters($sd) == $_whispering($sd_)} {
+            $_serverSocket write $sd_ \
+              "<$_currentChatters($sd_) (whisper)> $data_"
+            $_serverSocket write $sd \
+              "<$_currentChatters($sd_) (whisper)> $data_"
+          }
+        }
+      } else {
+        $_serverSocket broadcast "<$_currentChatters($sd_)> $data_"
+      }
+    }
+  }
+}
+
+
+#--------------------------------------------------------------------
+# PRIVATE METHOD serverMessage
+#
+# Description:
+#   Print a message to specific client's screen.  This may be done,
+#   for example, if the requested client's message is too long to be
+#   posted.
+#
+# Input Parameters:
+#   msg_: message to print to the client's screen
+#   sd_: the client's socket descriptor
+#
+# Return Values:
+#   None
+#--------------------------------------------------------------------
+::itcl::body ChatServer::serverMessage {msg_ sd_} {
+  $_serverSocket write $sd_ "---------------"
+  $_serverSocket write $sd_ "  ** MESSAGE FROM CHAT SERVER"
+  $_serverSocket write $sd_ "  ** $msg_"
+  if {$_reasonDenied != ""} {
+    $_serverSocket write $sd_ "     --> $_reasonDenied"
+    set _reasonDenied ""
+  } 
+  $_serverSocket write $sd_ "---------------"
+}

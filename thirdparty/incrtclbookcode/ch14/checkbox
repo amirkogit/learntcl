@@ -1,0 +1,16 @@
+# Create the checkbox.
+iwidgets::checkbox .cb -labeltext "Select a color(s):"
+pack .cb -fill both -expand 1
+wm geometry . 150x195
+
+# Add checkbuttons.
+.cb add red -text Red
+.cb add orange -text Orange
+.cb add yellow -text Yellow
+.cb add green -text Green
+.cb add blue -text Blue
+.cb add indigo -text Indigo
+.cb add violet -text Violet
+
+# Select some.
+.cb select 3; .cb select 4; .cb select end

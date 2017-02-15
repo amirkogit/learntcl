@@ -1,0 +1,141 @@
+::itcl::class Trace {
+  # Static Methods
+  public proc ACTIVATE {flags_} {SET_FLAGS $flags_ 1}
+  public proc DEACTIVATE {flags_} {SET_FLAGS $flags_ 0}
+  public proc EXE {where_}
+  public proc ERR {string_}
+  public proc WARN {string_}
+  public proc COMM {string_}
+  private proc SET_FLAGS {flags_ val_}
+
+  # Static Data Members
+  private common _ON
+    array set _ON "x 0 e 0 w 0 c 0"
+  private common _CHARS
+    array set _CHARS "e * w ! c #"
+  private common _INDENT ""
+  private common _LEVEL 1
+  private common _PAD "  "
+}
+
+
+#--------------------------------------------------------------------
+# PUBLIC PROCEDURE EXE
+#
+# Description:
+#   This method is responsible for printing the tracing output, which
+#   is indented for each new level on the call stack to produce a
+#   stair-step affect that makes the output easier to debug.  The key
+#   is the where_ parameter.  If "begin" then the calling method's
+#   name is printed followed by an open brace on the next line.  If
+#   "end" then a close brace is printed, which can be used in many
+#   editors like vi for handy brace matching.  The indentation is
+#   adjusted accordingly in either case.
+#
+# Input Parameters:
+#   where_: either "begin" or "end" - used for indentation. A better
+#           algorithm is implemented in Chapter 7 using itcl::local.
+#
+# Return Values:
+#   None
+#--------------------------------------------------------------------
+::itcl::body Trace::EXE {where_} {
+  set callingMethod [lindex [info level [expr [info level] - 1]] 0]
+  set commandName [uplevel [list namespace which $callingMethod]]
+  if {$_ON(x)} {
+    if {$where_ == "begin"} {
+      puts "${_INDENT}$commandName"
+      puts "$_INDENT\{"
+      set _INDENT "$_INDENT$_PAD"
+    } elseif {$where_ == "end"} {
+      set _INDENT [string range $_INDENT 2 end]
+      puts "$_INDENT\}"
+    }
+  }
+}
+
+
+#--------------------------------------------------------------------
+# PUBLIC PROCEDURE ERR
+#
+# Description:
+#   Print error messages.
+#
+# Input Parameters:
+#   string_: message to print
+#
+# Return Values:
+#   None
+#--------------------------------------------------------------------
+::itcl::body Trace::ERR {string_} {
+  if {$_ON(e)} {
+    puts "${_INDENT}$_CHARS(e)$_CHARS(e) ERROR: $string_"
+  }
+}
+
+
+#--------------------------------------------------------------------
+# PUBLIC PROCEDURE WARN
+#
+# Description:
+#   Print warning messages.
+#
+# Input Parameters:
+#   string_: message to print
+#
+# Return Values:
+#   None
+#--------------------------------------------------------------------
+::itcl::body Trace::WARN {string_} {
+  if {$_ON(w)} {
+    puts "${_INDENT}$_CHARS(w)$_CHARS(w) WARNING: $string_"
+  }
+}
+
+
+#--------------------------------------------------------------------
+# PUBLIC PROCEDURE COMM
+#
+# Description:
+#   Print informational/comment messages.
+#
+# Input Parameters:
+#   string_: message to print
+#
+# Return Values:
+#   None
+#--------------------------------------------------------------------
+::itcl::body Trace::COMM {string_} {
+  if {$_ON(c)} {
+    puts "${_INDENT}$_CHARS(c)$_CHARS(c) COMMENT: $string_"
+  }
+}
+
+
+#--------------------------------------------------------------------
+# PRIVATE PROCEDURE SET_FLAGS
+#
+# Description:
+#   Invoked by the ACTIVATE and DEACTIVATE procedures to enable and
+#   disable different message types.  
+#
+# Input Parameters:
+#   flags_: one or more of x, w, e, or c or can be "all"
+#   val_: either 1 or 0
+#
+# Return Values:
+#   None
+#--------------------------------------------------------------------
+::itcl::body Trace::SET_FLAGS {flags_ val_} {
+  if {$flags_ == "all"} {
+    foreach type "x e w c" {
+      set _ON($type) $val_ 
+    }
+  } else {
+    foreach type "x e w c" {
+      if {[string first $type $flags_] != -1} {
+        set _ON($type) $val_
+      }
+    } 
+  }
+}

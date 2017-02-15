@@ -1,0 +1,18 @@
+::itcl::class Color {
+  proc RGB {color_}
+}
+
+::itcl::body Color::RGB {color_} {
+  switch -- $color_ {
+    red     {set val "255   0   0"}
+    orange  {set val "255 165   0"}
+    yellow  {set val "255 255   0"}
+    green   {set val "0   255   0"}
+    blue    {set val "0     0 255"}
+    indigo  {set val "138  43 226"}
+    violet  {set val "238 130 238"}
+    default {set val "  0   0   0"}
+  }
+  return $val
+}
+

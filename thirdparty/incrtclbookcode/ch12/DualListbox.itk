@@ -1,0 +1,253 @@
+option add *DualListbox.textbackground ghostwhite widgetDefault
+option add *DualListbox.sbarwidth 14 widgetDefault
+
+::itcl::class DualListbox {
+  inherit ::itk::Widget
+  constructor {args} {}
+
+  # Configuration Options
+  itk_option define -state state State normal
+
+  # Public Methods
+  public method insert {side_ text_ {position_ "end"}}
+  public method get {side_ {first_ "0"} {last_ "end"}}
+  public method curselection {side_}
+
+  # Private Methods
+  private method move {where_ {howmany_ ""}}
+  private method createComponentWidgets {}
+  private method packComponentWidgets {}
+
+  # Private Data Members
+  private variable _cursor
+}
+
+
+::itcl::configbody DualListbox::state {
+  set state $itk_option(-state)
+  if {$state == "normal" || $state == "disabled"} {
+    foreach button "b1 b2 b3 b4" {
+      $itk_component($button) configure -state $state \
+        -cursor $_cursor($state)
+    }
+  } else {
+    error "Bad value: $state.  Should be normal or disabled."
+  }
+}
+
+
+::itcl::body DualListbox::constructor {args} {
+  set _cursor(normal) top_left_arrow
+  set _cursor(disabled) X_cursor
+
+  createComponentWidgets
+  packComponentWidgets
+
+  eval itk_initialize $args
+}
+
+
+::itcl::body DualListbox::insert {side_ text_ {position_ "end"}} {
+  if {$side_ != "left" && $side_ != "right"} {
+    return -code error "Bad option: $side_.  Should be left or right."
+  }
+
+  if {$position_ != "end" && ![regexp {^[0-9]*$} $position_]} {
+    return -code error "Bad position: $position_.  Should be an\
+      integer value or \"end.\""
+  } else {
+    $itk_component(${side_}lbox) insert $position_ $text_
+  }
+}
+
+
+::itcl::body DualListbox::get {side_ {first_ "0"} {last_ "end"}} {
+  if {$side_ != "left" && $side_ != "right"} {
+    return -code error "Bad option: $side_.  Should be left or right."
+  }
+
+  if ![regexp {^[0-9]*$} $first_] {
+    return -code error "Bad option: $first_.  Should be an integer."
+  }
+
+  if {![regexp {^[0-9]*$} $first_] && $last_ != "end"} {
+    return -code error "Bad option: $last_.  Should be an integer\
+      or \"end.\""
+  }
+
+  return [$itk_component(${side_}lbox) get $first_ $last_]
+}
+
+
+::itcl::body DualListbox::curselection {side_} {
+  if {$side_ != "left" && $side_ != "right"} {
+    return -code error "Bad option: $side_.  Should be left or right."
+  }
+
+  return [$itk_component(${side_}lbox) curselection]
+}
+
+
+::itcl::body DualListbox::move {where_ {howmany_ ""}} {
+  # Determine the direction.
+  switch -- $where_ {
+    right {
+      set from $itk_component(leftlbox)
+      set to   $itk_component(rightlbox)
+    }
+    left {
+      set from $itk_component(rightlbox)
+      set to   $itk_component(leftlbox)
+    }
+    default {
+      return -code error \
+        "Bad option: $side_.  Should be left or right."
+    }
+  }
+
+  # Move all entries if specified.
+  if {$howmany_ == "all"} {
+    eval $to insert end [$from get 0 end]
+    $from delete 0 end
+    return
+  }
+
+  # Move the selected entries over one at a time.
+  set selected [$from curselection]
+  foreach index $selected {
+    $to insert end [$from get $index]
+  }
+  for {set i 0} {$i < [llength $selected]} {incr i} {
+    $from delete [expr [lindex $selected $i] - $i]
+  }
+}
+
+
+::itcl::body DualListbox::createComponentWidgets {} {
+  # Create the three frames.   
+  itk_component add leftframe {
+    frame $itk_interior.left
+  } {
+    rename -relief lboxrelief lboxrelief Relief
+    rename -borderwidth bd bd Borderwidth
+  }
+  itk_component add buttonframe {
+    frame $itk_interior.buttons
+  }
+  itk_component add rightframe {
+    frame $itk_interior.right
+  } {
+    rename -relief lboxrelief lboxrelief Relief
+    rename -borderwidth bd bd Borderwidth
+  }
+
+  # Create the left listbox.
+  itk_component add leftlabel {
+    label $itk_component(leftframe).label
+  } {
+    rename -text lefttitle title Title
+  }
+  itk_component add leftlbox {
+    listbox $itk_component(leftframe).lbox -exportselection 0
+  } {
+    keep -selectmode
+    rename -background textbackground textbackground Background
+  }
+  itk_component add leftvsbar {
+    scrollbar $itk_component(leftframe).vsbar \
+      -command "$itk_component(leftlbox) yview"
+  } {
+    rename -width sbarwidth sbarwidth Width
+  }
+  itk_component add lefthsbar {
+    scrollbar $itk_component(leftframe).hsbar -orient horizontal \
+      -command "$itk_component(leftlbox) xview"
+  } {
+    rename -width sbarwidth sbarwidth Width
+  }
+  $itk_component(leftlbox) configure \
+    -xscrollcommand "$itk_component(lefthsbar) set" \
+    -yscrollcommand "$itk_component(leftvsbar) set"
+
+  # Create the buttons.
+  itk_component add b1 {
+    button $itk_component(buttonframe).b1 -text ">>" -width 7 \
+      -command [::itcl::code $this move right]
+  } {
+    ignore -background
+  }
+  itk_component add b2 {
+    button $itk_component(buttonframe).b2 -text "<<" -width 7 \
+      -command [::itcl::code $this move left]
+  } {
+    ignore -background
+  }
+  itk_component add b3 {
+    button $itk_component(buttonframe).b3 -text "All >>" -width 7 \
+      -command [::itcl::code $this move right all]
+  } {
+    ignore -background
+  }
+  itk_component add b4 {
+    button $itk_component(buttonframe).b4 -text "<< All" -width 7 \
+      -command [::itcl::code $this move left all]
+  } {
+    ignore -background
+  }
+
+  # Create the right listbox.
+  itk_component add rightlabel {
+    label $itk_component(rightframe).label
+  } {
+    rename -text righttitle title Title
+  }
+  itk_component add rightlbox {
+    listbox $itk_component(rightframe).lbox -exportselection 0
+  } {
+    keep -selectmode
+    rename -background textbackground textbackground Background
+  }
+  itk_component add rightvsbar {
+    scrollbar $itk_component(rightframe).vsbar \
+      -command "$itk_component(rightlbox) yview"
+  } {
+    rename -width sbarwidth sbarwidth Width
+  }
+  itk_component add righthsbar {
+    scrollbar $itk_component(rightframe).hsbar -orient horizontal \
+      -command "$itk_component(rightlbox) xview"
+  } {
+    rename -width sbarwidth sbarwidth Width
+  }
+  $itk_component(rightlbox) configure \
+    -xscrollcommand "$itk_component(righthsbar) set" \
+    -yscrollcommand "$itk_component(rightvsbar) set"
+}
+
+
+::itcl::body DualListbox::packComponentWidgets {} {
+  # The left listbox.
+  grid $itk_component(leftlabel) -sticky w
+  grid $itk_component(leftlbox) $itk_component(leftvsbar) -sticky nsew
+  grid $itk_component(lefthsbar) -column 0 -sticky ew
+  grid columnconfigure $itk_component(leftframe) 0 -weight 1
+  grid rowconfigure $itk_component(leftframe) 1 -weight 1
+
+  # The buttons.
+  foreach button "b1 b2 b3 b4" {
+    grid $itk_component($button) -pady 4
+  }
+
+  # The right listbox.
+  grid $itk_component(rightlabel) -sticky w
+  grid $itk_component(rightlbox) $itk_component(rightvsbar) \
+    -sticky nsew
+  grid $itk_component(righthsbar) -column 0 -sticky ew
+  grid columnconfigure $itk_component(rightframe) 0 -weight 1
+  grid rowconfigure $itk_component(rightframe) 1 -weight 1
+
+  # The outer frames.
+  pack $itk_component(leftframe) -fill both -expand 1 -side left
+  pack $itk_component(buttonframe) -fill both -side left -padx 8
+  pack $itk_component(rightframe) -fill both -expand 1 -side left
+}

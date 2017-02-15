@@ -1,0 +1,49 @@
+::itcl::class TimedSocket {
+  inherit SocketHandler TimerHandler
+
+  # Class constructor
+  constructor {upperLimit_ sd_ {host_ localhost} {port_ 31213}} {
+    SocketHandler::constructor $sd_
+    TimerHandler::constructor $upperLimit_
+  } {
+    set _host $host_
+    set _port $port_
+  }
+  # Class Methods
+  private method handleServerInput {}
+  private method count {}
+  private method reconnect {}
+
+  # Class Data Members
+  private variable _host
+  private variable _port
+}
+
+
+::itcl::body TimedSocket::handleServerInput {} {
+  if {[gets $_sd data] < 0} {
+    # Connection is lost!
+    puts "Lost connection with server! Attempting reconnect..."
+    close $_sd
+    start
+  } else {
+    # Handle server input here as necessary.
+  }
+}
+
+::itcl::body TimedSocket::count {} {
+  if {$_elapsedTime >= $_upperLimit} {
+    puts "Time has expired."
+  } else {
+    incr _elapsedTime 10
+    set _afterId [after 10000 [::itcl::code $this count]]
+    reconnect
+  }
+}
+
+::itcl::body TimedSocket::reconnect {} {
+  if {![catch {connect $_host $_port}]} {
+    stop
+  }
+}
+

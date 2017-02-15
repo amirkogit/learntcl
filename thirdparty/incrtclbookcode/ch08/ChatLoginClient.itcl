@@ -1,0 +1,36 @@
+::itcl::class ChatLoginClient {
+  inherit LoginClient
+  private method process {data_}
+}
+
+
+#--------------------------------------------------------------------
+# PRIVATE METHOD process
+#
+# Description:
+#   This method overrides the base class process method to handle
+#   the chat room specific task of creating a ChatRoomUser object.
+#   It is invoked by the ClientSocket object to handle input from the
+#   server.
+#
+#   NOTE: The ChatRoomUser object is created using the default
+#   "localhost" server address.  In order to create a chat room that
+#   works in a network, you need to specify the server's IP address
+#   (and port number if necessary) following the username.
+# 
+# Input Parameters:
+#   data_: message from the LoginMgr object
+#
+# Return Values:
+#   None
+#--------------------------------------------------------------------
+::itcl::body ChatLoginClient::process {data_} {
+  if {$data_ == "access granted"} {
+    if {[catch {ChatRoomUser #auto $_username} chatRoomUser]} {
+      # Display error message as desired.
+    } else {
+      $chatRoomUser activate
+      ::itcl::delete object $this
+    }
+  }
+}

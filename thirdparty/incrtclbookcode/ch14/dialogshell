@@ -1,0 +1,25 @@
+# Create the dialogshell.
+set ds [iwidgets::dialogshell .ds -pady 12 \
+  -title "Generic Error Dialog"]
+
+# Add a couple of buttons.
+$ds add ok -text OK -command "$ds deactivate"
+$ds add details -text "Details >>" -command {
+  # Display detailed error message.
+}
+$ds default ok
+
+# Add a warning bitmap and a message in the childsite frame.
+set cs [$ds childsite]
+label $cs.err -bitmap error -foreground red
+message $cs.msg -justify left -width 300 -text "This is an\
+  example of a specialized dialogshell with a bitmap and\
+  some text added in the childsite and a couple of buttons\
+  in the buttonbox."
+pack $cs.err -padx 8 -side left
+pack $cs.msg -side left
+
+# Tell the dialog to draw itself in the middle of the screen.
+$ds center
+update idletasks
+after idle "$ds activate"

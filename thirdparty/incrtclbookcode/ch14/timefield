@@ -1,0 +1,9 @@
+wm title . timefield
+
+# Create the timefield.
+iwidgets::timefield .tf -labeltext "Current selected time:" \
+  -format military
+pack .tf -padx 8 -pady 6
+
+# Show the time 7 hours ago.
+.tf show "7 hours ago"

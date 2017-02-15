@@ -1,0 +1,117 @@
+::itcl::class ClientSocket {
+  # Class constructor/destructor
+  constructor {{host_ localhost} {port_ 20002}} {}
+  destructor {close $_socket}
+
+  # Class Methods
+  public method write {data_}
+  public method register {command_} {set _clientFunction $command_}
+  private method handleServerInput {}
+
+  # Class Data Members
+  private variable _socket
+  private variable _activated 0
+  private variable _clientFunction ""
+}
+
+
+#--------------------------------------------------------------------
+# CONSTRUCTOR
+#
+# Description:
+#   Try to connect to the ServerSocket object by opening a socket to
+#   the designated host and port number. Note that the default values
+#   are the same for both ClientSocket and ServerSocket. You only
+#   need to specify parameters for ClientSocket's constructor if you
+#   override the defaults for ServerSocket.
+# 
+# Input Parameters:
+#   host_: IP address of the computer on which the server is running
+#          - the default value is localhost
+#   port_: port number to which clients should connect - default
+#          value is 20002
+#
+# Return Values:
+#   TCL_OK or TCL_ERROR
+#--------------------------------------------------------------------
+::itcl::body ClientSocket::constructor {{host_ localhost} {port_ 20002}} {
+  Trace::EXE begin
+  # Connect with the socket opened by the ServerSocket object.
+  if {[catch {socket $host_ $port_} _socket]} {
+    Trace::ERR "Failed to connect to server: $_socket"
+    Trace::EXE end
+    return -code error
+  }
+
+  # When the server writes to the socket, handle its input.
+  fconfigure $_socket -buffering line
+  fileevent $_socket readable [::itcl::code $this handleServerInput]
+  Trace::EXE end
+}
+
+
+#--------------------------------------------------------------------
+# PUBLIC METHOD write
+#
+# Description:
+#   Send a message to the server.
+#
+# Input Parameters:
+#   data_: message to send
+#
+# Return Values:
+#   TCL_OK or TCL_ERROR
+#--------------------------------------------------------------------
+::itcl::body ClientSocket::write {data_} {
+  Trace::EXE begin
+  # If not activated, return an error.
+  if {!$_activated} {
+    Trace::ERR \
+      "Cannot write to socket.  Connection not yet established."
+    Trace::EXE end
+    return -code error 
+  }
+  puts $_socket $data_
+  Trace::EXE end
+}
+
+
+
+#--------------------------------------------------------------------
+# PUBLIC METHOD handleServerInput
+#
+# Description:
+#   Handles input from the server, including handshaking and
+#   forwarding the data to an outside source for processing.
+#
+# Input Parameters:
+#   None
+#
+# Return Values:
+#   None
+#--------------------------------------------------------------------
+::itcl::body ClientSocket::handleServerInput {} {
+  Trace::EXE begin
+  Trace::COMM "Processing new data from the server..."
+  if {[gets $_socket data] < 0} {
+    Trace::ERR "Server has closed socket.  Deleting self..."
+    ::itcl::delete object $this
+  } elseif {$data == "registration requested"} {
+    Trace::COMM "Registering with the server..."
+    puts $_socket "register me"
+  } elseif {$data == "connection established"} {
+    Trace::COMM "Connection is established.  Activating..."
+    set _activated 1
+    uplevel #0 {set CONNECTION_ESTABLISHED 1}
+  } else {
+    Trace::COMM "Received message: \"$data\""
+    if {[llength $_clientFunction]} {
+      Trace::COMM \
+        "  - Forwarding to client function for processing..."
+      $_clientFunction $data
+    } else {
+      Trace::WARN "  - Don't know what to do with it.  Returning..."
+    }
+  }
+  Trace::EXE end
+}

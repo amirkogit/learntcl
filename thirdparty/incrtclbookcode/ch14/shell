@@ -1,0 +1,16 @@
+# Create the shell.
+iwidgets::shell .sh -padx 20 -pady 20 -title shell -background bisque
+.sh component hull configure -relief ridge -bd 3
+
+# Create a message in the shell childsite.
+set cs [.sh childsite]
+message $cs.m -text "A shell just has a hull frame and a childsite.\
+  You probably will never need to create a shell as a standalone\
+  \[incr Widget\]. It is really meant to be used as a base class\
+  only." -justify left -width 175 -background bisque
+pack $cs.m
+
+# Center and draw the shell window.
+.sh center
+update idletasks
+.sh activate

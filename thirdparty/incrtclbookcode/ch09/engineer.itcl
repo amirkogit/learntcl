@@ -1,0 +1,6 @@
+itcl::class Engineer {
+  public method work {} @work
+  public method play {} {
+    puts "All work and no play makes $this a dull boy!"
+  }
+}

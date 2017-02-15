@@ -1,0 +1,6 @@
+# Create the fileselectionbox. Note that this pathname may not
+# exist on your system. This is the same code used in the
+# extfileselectionbox example so you can see how similar the two are.
+iwidgets::fileselectionbox .fsb -mask "*box.itk" \
+  -directory ${iwidgets::library}/scripts
+pack .fsb -fill both -expand 1

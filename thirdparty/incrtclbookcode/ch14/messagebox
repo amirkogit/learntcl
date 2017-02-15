@@ -1,0 +1,23 @@
+# Create the messagebox.
+wm geometry . 410x220
+wm title . "System Logs"
+iwidgets::messagebox .mb -borderwidth 2
+pack .mb -fill both -expand 1
+
+# Create a couple of new message types.
+set font -Adobe-Helvetica-Bold-R-Normal--*-140-*-*-*-*-*-*
+.mb type add info -background grey75 -foreground black -font $font
+.mb type add warning -background grey50 -foreground white -font $font
+.mb type add error -background red -foreground yellow -font $font
+
+# Now add some messages.
+.mb issue "Things are just jim-dandy. All systems are functional." \
+  info
+.mb issue "Systems Clear" info; .mb issue "Systems Clear" info
+.mb issue "Check sector 4 in the gamma quadrant, stat! System \
+  failure likely!" warning
+.mb issue "System Alert" warning; .mb issue "System Alert" warning
+.mb issue "All Systems Clear. Resume your positions." info
+.mb issue "Danger! Danger! Jump ship! She's gonna blow!" error
+.mb issue "System FAILURE" error
+.mb issue "Initiating self-destruct sequence in 10...9...8..." error

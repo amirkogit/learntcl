@@ -1,0 +1,25 @@
+# Create the messagedialog.
+iwidgets::messagedialog .md \
+  -text "Burnin' down the house!\nLogo by John P. Davis\n\n\
+    \[incr Widgets\] Made Possible By:\nMark Harrison\nAlfredo Jahn\n\
+    Michael McLennan\nKris Raney\nBret Schumacher\nTako Schotanus\n\
+    Bill Scott\nJohn Sigler\nJohn Tucker\nMark Ulferts\nSue Yockey" \
+  -title "Give credit where credit is due: \[incr Widgets\]\
+    Acknowledgements" -textpady 0
+
+# Create an image to display next to the message.
+set img [image create photo \
+  -file ${iwidgets::library}/demos/iwidgets.gif]
+.md configure -image $img
+.md component image configure -relief ridge -bd 3
+
+# Change the buttons a bit.
+.md buttonconfigure 0 -text Great
+.md buttonconfigure 1 -text Job
+.md buttonconfigure 2 -text By
+.md buttonconfigure 3 -text All
+.md show 1; .md show 3
+
+# Center the messagedialog and activate it.
+.md center
+after idle ".md activate"

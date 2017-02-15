@@ -1,0 +1,58 @@
+::itcl::class DebugServer {
+  # Class constructor/destructor
+  constructor {port_} {}
+  destructor {catch {close $_socket}}
+
+  # Class Methods
+  private method connect {sd_ address_ port_}
+  private method processRequest {sd_}
+
+  # Class Data Members
+  private variable _socket
+}
+
+
+::itcl::body DebugServer::constructor {port_} {
+  # Create the server socket
+  if [catch {
+    socket -server [namespace code "$this connect"] $port_
+  } _socket] {
+    return -code error
+  }
+}
+
+
+::itcl::body DebugServer::connect {sd_ address_ port_} {
+  fconfigure $sd_ -buffering line
+  fileevent $sd_ readable [namespace code "$this processRequest $sd_"]
+  puts "New connection accepted from client on $address_, port $port_"
+}
+
+
+::itcl::body DebugServer::processRequest {sd_} {
+  if [catch {gets $sd_ data} rc] {
+    close $sd_
+    puts "Unable to process client request: $rc"
+    return
+  }
+  if {$rc > 0} {
+    set type [lindex $data 0]
+    set flags [lindex $data end]
+    if {$type == "activate"} {
+      if [catch {Trace::ACTIVATE $flags} err] {
+        puts "Unable to activate debug output: $err"
+      } else {
+        puts "Successfully turned on Trace flags: $flags"
+      }
+    } elseif {$type == "deactivate"} {
+      if [catch {Trace::DEACTIVATE $flags} err] {
+        puts "Unable to deactivate debug output: $err"
+      } else {
+        puts "Successfully disabled Trace flags: $flags"
+      }
+    }
+  } else {
+    puts "Lost client connection."
+    close $sd_
+  }
+}

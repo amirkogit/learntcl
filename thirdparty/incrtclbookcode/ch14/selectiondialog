@@ -1,0 +1,21 @@
+# Create the selectiondialog.
+iwidgets::selectiondialog .sd -borderwidth 2 -height 325 \
+  -width 265 -title "Front end to a man page viewer" \
+  -itemslabel "\[incr Widgets\]" -textbackground ghostwhite \
+  -labelfont -Adobe-Helvetica-Bold-R-Normal--*-140-*-*-*-*-*-*
+ 
+# Get rid of the Apply button and modify the OK button. You can
+# configure the OK button, for example, to create a scrolledhtml
+# to display the HTML-formatted man page for the selected
+# [incr Widget].
+.sd hide Apply 
+.sd buttonconfigure OK -text "View Man Page"
+
+# Glob the iwidgets in the scrolledlistbox.
+cd ${iwidgets::library}/scripts
+eval .sd insert items 0 [glob *.itk]
+
+# When everything's done, display the dialog.
+.sd center
+update idletasks 
+.sd activate

@@ -1,0 +1,17 @@
+::itcl::class Floor {}
+
+::itcl::class Building {
+  constructor {} {
+    set _floor [Floor #auto]
+  }
+  destructor {}
+
+  private variable _floor ""
+}
+
+
+::itcl::body Building::destructor {} {
+  if {$_floor != ""} {
+    ::itcl::delete object $_floor
+  }
+}

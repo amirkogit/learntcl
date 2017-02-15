@@ -1,0 +1,179 @@
+#====================================================================
+# NOTE: This class is a copy of the one from Chapter 6 except for the
+# process method, which had to be modified to work with the chat
+# room in Chapter 7.  As mentioned in Chapter 7, a better design is
+# to define a derived class from LoginClient to handle chat room
+# specific tasks.  This is described in Chapter 8.  Note also that
+# all tracing is removed from this version.
+#====================================================================
+
+::itcl::class LoginClient {
+  # Class constructor/destructor
+  constructor {} {}
+  destructor {
+    catch {
+      destroy $_toplevel
+      ::itcl::delete object $_clientSocket
+    }
+  }
+
+  # Class Methods
+  public method draw {} {wm deiconify $_toplevel}
+  protected method process {data_}
+  private method createClientSocket {}
+  private method createMainScreen {}
+  private method requestLogin {}
+
+  # Class Data Members
+  private variable _toplevel
+  private variable _clientSocket
+  private variable _password ""
+  private variable _username ""
+}
+
+
+#--------------------------------------------------------------------
+# CONSTRUCTOR
+#
+# Description:
+#   Attempt to connect to the login server via ClientSocket object. 
+#   If successful, create the main login screen.
+# 
+# Input Parameters:
+#   None
+#
+# Return Values:
+#   TCL_OK or TCL_ERROR
+#--------------------------------------------------------------------
+::itcl::body LoginClient::constructor {} {
+  # Create the socket for sending login request to server.
+  if {[catch {createClientSocket} err]} {
+    return -code error
+  }
+  # Socket creation succeeded.  Create login screen.
+  createMainScreen
+}
+
+
+#--------------------------------------------------------------------
+# PROTECTED METHOD process
+#
+# Description:
+#   This method is invoked by the ClientSocket object to handle
+#   input from the server. If the login request is successful, this
+#   method allows access to the rest of the application.  In this
+#   case, a ChatRoomUser object is created and activated.  See the
+#   note at the top of this file for more information.
+#
+#   NOTE: The ChatRoomUser object is created using the default
+#   "localhost" server address.  In order to create a chat room that
+#   works in a network, you need to specify the server's IP address
+#   (and port number if necessary) following the username.
+# 
+# Input Parameters:
+#   data_: message from the LoginMgr object
+#
+# Return Values:
+#   None
+#--------------------------------------------------------------------
+::itcl::body LoginClient::process {data_} {
+  if {$data_ == "access granted"} {
+    if {[catch {ChatRoomUser #auto $_username} chatRoomUser]} {
+      # Display error message as desired.
+    } else {
+      $chatRoomUser activate
+      ::itcl::delete object $this
+    }
+  }
+}
+
+
+#--------------------------------------------------------------------
+# PRIVATE METHOD createClientSocket
+#
+# Description:
+#   Create an instance of the ClientSocket class. If successful,
+#   register the process method with the client to be invoked when
+#   input from the server is received.
+#
+#   NOTE: The ClientSocket object is created using the default
+#   "localhost" server address.  In order to create a chat room that
+#   works in a network, you need to specify the server's IP address
+#   (and port number if necessary) following the username.
+# 
+# Input Parameters:
+#   None
+#
+# Return Values:
+#   TCL_OK or TCL_ERROR
+#--------------------------------------------------------------------
+::itcl::body LoginClient::createClientSocket {} {
+  if {[catch {ClientSocket #auto} _clientSocket]} {
+    return -code error
+  }
+  # Register a method for handling server responses.
+  $_clientSocket register [::itcl::code $this process]
+}
+
+
+#--------------------------------------------------------------------
+# PRIVATE METHOD createMainScreen
+#
+# Description:
+#   Create the main login screen for entering the username and
+#   password.
+# 
+# Input Parameters:
+#   None
+#
+# Return Values:
+#   None
+#--------------------------------------------------------------------
+::itcl::body LoginClient::createMainScreen {} {
+  set _toplevel [toplevel .[namespace tail $this]]
+  wm withdraw $_toplevel
+  wm resizable $_toplevel 0 0
+
+  label $_toplevel.name -text "User Name:"
+  entry $_toplevel.nametxt -width 12 \
+    -textvariable [::itcl::scope _username]
+
+  label $_toplevel.pswd -text "Password:"
+  entry $_toplevel.pswdtxt -show * -width 12 \
+    -textvariable [::itcl::scope _password]
+
+  frame $_toplevel.sep -height 4 -relief sunken -bd 2
+  button $_toplevel.ok -text OK \
+    -command [::itcl::code $this requestLogin]
+  button $_toplevel.cancel -text Cancel \
+    -command "::itcl::delete object $this"
+
+  grid $_toplevel.name $_toplevel.nametxt -pady 4
+  grid $_toplevel.pswd $_toplevel.pswdtxt
+  grid configure $_toplevel.pswd -sticky w
+  grid $_toplevel.sep -sticky ew -pady 12 -columnspan 2
+  grid $_toplevel.ok $_toplevel.cancel -pady 4
+}
+
+
+#--------------------------------------------------------------------
+# PRIVATE METHOD requestLogin
+#
+# Description:
+#   Invoked when the 'OK' button on the login screen is pressed to
+#   send a message to the server for validating the login information.
+# 
+# Input Parameters:
+#   None
+#
+# Return Values:
+#   None
+#--------------------------------------------------------------------
+::itcl::body LoginClient::requestLogin {} {
+  # Return if nothing is entered.
+  if {$_username == "" || $_password == ""} {
+    return
+  }
+  # Send the request.
+  $_clientSocket write "login $_username $_password"
+}

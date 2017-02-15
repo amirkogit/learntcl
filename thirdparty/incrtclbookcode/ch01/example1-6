@@ -1,0 +1,28 @@
+::itcl::class ErrorDialog {
+  # Inheritance
+  inherit DialogWindow
+
+  # Class constructor and destructor
+  constructor {message_} {DialogWindow::constructor $message_} {
+    set _bitmap [label $_textFrame.bmap -bitmap error -fg red]
+    set _buttonFrame [frame $_toplevelWindow.bbox]
+    set _okButton [button $_buttonFrame.ok -text OK \
+      -command "::itcl::delete object $this"]
+    set _detailsButton [button $_buttonFrame.details -text "Details >>"]
+  }
+  destructor {}
+
+  # Class Methods
+  public method draw {} {
+    DialogWindow::draw
+    pack $_bitmap -side left -expand 1
+    pack $_okButton $_detailsButton -side left -expand 1
+    pack $_buttonFrame -fill both -pady 8
+    wm deiconify $_toplevelWindow
+  }
+
+  # Class Data Members
+  private variable _buttonFrame
+  private variable _okButton
+  private variable _detailsButton
+}

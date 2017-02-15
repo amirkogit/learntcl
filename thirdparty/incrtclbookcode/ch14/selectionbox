@@ -1,0 +1,10 @@
+# Create the selectionbox.
+wm title . selectionbox 
+iwidgets::selectionbox .sb -borderwidth 2 -height 250 \
+  -labelfont -Adobe-Helvetica-Bold-R-Normal--*-140-*-*-*-*-*-* \
+  -textbackground ghostwhite -itemslabel "\[incr Widgets\]"
+pack .sb
+
+# Glob the iwidgets in the scrolledlistbox.
+cd ${iwidgets::library}/scripts
+eval .sb insert items 0 [glob *.itk]

@@ -1,0 +1,24 @@
+wm title . tabnotebook
+
+# Create the tabnotebook.
+iwidgets::tabnotebook .tb -tabpos n -width 325 -height 215 \
+  -backdrop grey65
+
+# Create and fill in the page for tab 1. Note the pathname will
+# likely not exist on your system.
+set tab1 [.tb add -label "Itcl Powered"]
+frame $tab1.f -relief ridge -bd 3
+label $tab1.f.img -relief ridge -bd 4 -image [image create photo \
+  -file "C:/tmp/itclpwrd.gif"]
+pack $tab1.f.img -padx 16 -pady 16 -expand 1
+pack $tab1.f -fill both -expand 1
+
+# Pages 2 and 3 are blank. You can add any kind of Tk widget or
+# [incr Widget] to the page childsites stored in $tab2 and $tab3.
+set tab2 [.tb add -label "Tab 2"]
+pack [label $tab2.l -text "Welcome to tab 2!"] -expand 1
+set tab3 [.tb add -label "Tab 3"]
+pack [label $tab3.l -text "Welcome to tab 3!"] -expand 1
+
+pack .tb -fill both -expand 1
+.tb select 0

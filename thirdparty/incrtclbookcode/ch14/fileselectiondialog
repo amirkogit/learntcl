@@ -1,0 +1,11 @@
+# Create the fileselectiondialog. Note that this pathname may not
+# exist on your system. This is the same code used in the
+# extfileselectiondialog example so you can see how similar the
+# two are.
+iwidgets::fileselectiondialog .fsd \
+  -directory "C:/Program Files/TclPro1.2/lib/iwidgets3.0.0"
+
+# Tell it to draw itself in the middle of the screen.
+update idletasks
+.fsd center
+after idle ".fsd activate"
